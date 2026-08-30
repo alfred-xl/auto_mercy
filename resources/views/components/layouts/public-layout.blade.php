@@ -39,20 +39,6 @@
 <body class="min-h-screen overflow-x-hidden bg-surface-primary font-sans text-text-primary antialiased">
     <a href="#main-content" class="fixed left-4 top-3 z-[100] -translate-y-24 bg-pure-white px-4 py-3 font-semibold text-carbon shadow-overlay transition-transform focus:translate-y-0">Skip to main content</a>
 
-    <div class="bg-carbon text-pure-white">
-        <div class="mx-auto flex min-h-10 max-w-site items-center justify-between gap-4 px-gutter py-2 text-xs font-medium tracking-wide">
-            <p class="hidden items-center gap-2 sm:flex">
-                <span class="h-1.5 w-1.5 bg-mercy-red" aria-hidden="true"></span>
-                CAC Registered: 7328497
-            </p>
-            <p class="hidden md:block">Monday–Saturday, 8:00 AM–6:00 PM</p>
-            <div class="ml-auto flex items-center gap-4">
-                <a class="transition-colors hover:text-metallic" href="mailto:{{ config('automercy.business.email') }}">{{ config('automercy.business.email') }}</a>
-                <a class="font-semibold text-pure-white transition-colors hover:text-metallic" href="{{ config('automercy.business.telephone_url') }}">{{ config('automercy.business.phone_display') }}</a>
-            </div>
-        </div>
-    </div>
-
     <header class="relative z-50 border-b border-border-default bg-pure-white">
         <div class="mx-auto flex min-h-20 max-w-site items-center justify-between gap-6 px-gutter">
             <a href="{{ route('home') }}" class="inline-flex shrink-0 items-center" aria-label="Auto Mercy home">
