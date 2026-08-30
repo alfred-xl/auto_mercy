@@ -1,0 +1,143 @@
+@theme static {
+    /* Brand and action colours */
+    --color-mercy-red: #a60d0e;
+    --color-mercy-red-dark: #7d090a;
+    --color-carbon: #111010;
+    --color-graphite: #1b1b1d;
+    --color-pure-white: #fefefe;
+    --color-pearl: #f5f5f3;
+    --color-metallic: #d8dadd;
+    --color-slate: #676b72;
+    --color-available: #18794e;
+    --color-whatsapp: #25d366;
+
+    /* Brand type families */
+    --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --font-sans: 'DM Sans', Inter, Arial, sans-serif;
+
+    /* Responsive brand type scale */
+    --text-display: clamp(3rem, 7vw, 5.5rem);
+    --text-display--line-height: 0.95;
+    --text-display--letter-spacing: -0.035em;
+    --text-display--font-weight: 400;
+    --text-h1: clamp(2.5rem, 5vw, 4.5rem);
+    --text-h1--line-height: 1;
+    --text-h1--letter-spacing: -0.03em;
+    --text-h1--font-weight: 400;
+    --text-h2: clamp(2.125rem, 4vw, 3.5rem);
+    --text-h2--line-height: 1.05;
+    --text-h2--letter-spacing: -0.025em;
+    --text-h2--font-weight: 400;
+    --text-h3: clamp(1.75rem, 3vw, 2.5rem);
+    --text-h3--line-height: 1.1;
+    --text-h3--letter-spacing: -0.02em;
+    --text-h3--font-weight: 400;
+    --text-h4: clamp(1.25rem, 2vw, 1.5rem);
+    --text-h4--line-height: 1.2;
+    --text-h4--letter-spacing: -0.01em;
+    --text-h4--font-weight: 600;
+    --text-body-lg: 1.125rem;
+    --text-body-lg--line-height: 1.7;
+    --text-body: 1rem;
+    --text-body--line-height: 1.65;
+    --text-body-sm: 0.875rem;
+    --text-body-sm--line-height: 1.55;
+    --text-label: 0.875rem;
+    --text-label--line-height: 1.35;
+    --text-label--letter-spacing: 0.08em;
+    --text-label--font-weight: 600;
+    --text-button: 1rem;
+    --text-button--line-height: 1.25;
+    --text-button--letter-spacing: 0.01em;
+    --text-button--font-weight: 600;
+    --text-vehicle-price: clamp(1.5rem, 3vw, 2.25rem);
+    --text-vehicle-price--line-height: 1.1;
+    --text-vehicle-price--letter-spacing: -0.02em;
+    --text-vehicle-price--font-weight: 700;
+    --text-vehicle-name: clamp(1.125rem, 2vw, 1.375rem);
+    --text-vehicle-name--line-height: 1.25;
+    --text-vehicle-name--font-weight: 600;
+    --text-vehicle-meta: 0.875rem;
+    --text-vehicle-meta--line-height: 1.5;
+    --text-vehicle-meta--font-weight: 500;
+
+    /* Supported type weights, line heights, and tracking */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --leading-display: 0.95;
+    --leading-heading: 1.1;
+    --leading-ui: 1.4;
+    --leading-body: 1.65;
+    --tracking-display: -0.035em;
+    --tracking-heading: -0.02em;
+    --tracking-button: 0.01em;
+    --tracking-label: 0.08em;
+
+    /* Content widths and spacing */
+    --container-site: 80rem;
+    --container-wide: 90rem;
+    --container-reading: 42rem;
+    --spacing-gutter: clamp(1rem, 4vw, 2rem);
+    --spacing-section: clamp(4rem, 8vw, 7.5rem);
+    --spacing-section-compact: clamp(2.5rem, 5vw, 4rem);
+    --spacing-grid: clamp(1rem, 2vw, 1.5rem);
+    --spacing-touch: 2.75rem;
+
+    /* Restrained shape and depth */
+    --radius-badge: 0.25rem;
+    --radius-button: 0.5rem;
+    --radius-input: 0.5rem;
+    --radius-card: 0.75rem;
+    --shadow-card: 0 0.5rem 1.5rem rgb(17 16 16 / 0.08);
+    --shadow-card-hover: 0 0.875rem 2rem rgb(17 16 16 / 0.12);
+    --shadow-overlay: 0 1.25rem 3rem rgb(17 16 16 / 0.18);
+
+    /* Image proportions */
+    --aspect-vehicle-card: 4 / 3;
+    --aspect-vehicle-gallery: 16 / 10;
+    --aspect-brand-photo: 3 / 2;
+
+    /* Motion easing and Tailwind transition defaults */
+    --ease-brand: cubic-bezier(0.2, 0, 0, 1);
+    --ease-brand-exit: cubic-bezier(0.4, 0, 1, 1);
+    --transition-duration-fast: 120ms;
+    --transition-duration-standard: 180ms;
+    --transition-duration-slow: 260ms;
+    --default-transition-duration: var(--transition-duration-standard);
+    --default-transition-timing-function: var(--ease-brand);
+}
+
+@theme static inline {
+    /* Semantic aliases resolve directly to the approved primitive colours. */
+    --color-surface-primary: var(--color-pure-white);
+    --color-surface-secondary: var(--color-pearl);
+    --color-surface-dark: var(--color-carbon);
+    --color-surface-dark-secondary: var(--color-graphite);
+    --color-text-primary: var(--color-carbon);
+    --color-text-secondary: var(--color-slate);
+    --color-text-inverse: var(--color-pure-white);
+    --color-border-default: var(--color-metallic);
+    --color-border-strong: var(--color-slate);
+    --color-status-available: var(--color-available);
+    --color-status-reserved: var(--color-mercy-red-dark);
+    --color-status-sold: var(--color-slate);
+    --color-status-newly-added: var(--color-carbon);
+    --color-status-featured: var(--color-mercy-red);
+}
+
+:root {
+    --focus-ring-width: 0.1875rem;
+    --focus-ring-offset: 0.125rem;
+    --focus-ring-color-light: var(--color-mercy-red);
+    --focus-ring-color-dark: var(--color-pure-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition-duration-fast: 1ms;
+        --transition-duration-standard: 1ms;
+        --transition-duration-slow: 1ms;
+    }
+}
