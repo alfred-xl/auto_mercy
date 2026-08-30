@@ -36,7 +36,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen overflow-x-hidden bg-surface-primary font-sans text-text-primary antialiased pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+<body class="min-h-screen overflow-x-hidden bg-surface-primary font-sans text-text-primary antialiased">
     <a href="#main-content" class="fixed left-4 top-3 z-[100] -translate-y-24 bg-pure-white px-4 py-3 font-semibold text-carbon shadow-overlay transition-transform focus:translate-y-0">Skip to main content</a>
 
     <div class="bg-carbon text-pure-white">
@@ -72,16 +72,16 @@
                 <a href="{{ config('automercy.business.whatsapp_url') }}?text={{ rawurlencode('Hello Auto Mercy, I would like help finding a car.') }}" class="btn-primary" target="_blank" rel="noopener">WhatsApp Us</a>
             </div>
 
-            <button type="button" class="inline-flex h-11 w-11 items-center justify-center border border-border-default text-carbon transition-colors hover:border-carbon lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-trigger>
+            <button type="button" class="mobile-menu-trigger inline-flex h-11 w-11 items-center justify-center rounded-button border-2 border-border-strong text-carbon transition-colors hover:border-mercy-red hover:text-mercy-red lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-trigger>
                 <span class="sr-only">Open navigation</span>
                 <svg class="h-6 w-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
             </button>
         </div>
 
         <div id="mobile-menu" class="absolute inset-x-0 top-full hidden border-y border-border-default bg-pure-white shadow-overlay lg:hidden" data-mobile-menu>
-            <nav class="mx-auto grid max-w-site px-gutter py-5" aria-label="Mobile navigation">
-                <a class="mobile-nav-link" href="{{ route('home') }}">Home</a>
-                <a class="mobile-nav-link" href="{{ route('cars.index') }}">Available Cars</a>
+            <nav class="mx-auto grid max-w-site gap-1 px-gutter py-5" aria-label="Mobile navigation">
+                <a class="mobile-nav-link" href="{{ route('home') }}" @if (request()->routeIs('home')) aria-current="page" @endif>Home</a>
+                <a class="mobile-nav-link" href="{{ route('cars.index') }}" @if (request()->routeIs('cars.*')) aria-current="page" @endif>Available Cars</a>
                 <a class="mobile-nav-link" href="{{ route('home') }}#how-to-buy">How to Buy</a>
                 <a class="mobile-nav-link" href="{{ route('home') }}#about">About</a>
                 <a class="mobile-nav-link" href="{{ route('home') }}#locations">Car Stands</a>
@@ -142,15 +142,5 @@
         </div>
     </footer>
 
-    <div class="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 border-t border-white/15 bg-carbon pb-[env(safe-area-inset-bottom)] text-sm font-semibold text-pure-white lg:hidden" aria-label="Quick contact">
-        <a href="{{ config('automercy.business.telephone_url') }}" class="flex min-h-16 items-center justify-center gap-2 border-r border-white/15">
-            <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h3l2 5-2 1a15 15 0 0 0 6 6l1-2 5 2v3a2 2 0 0 1-2 2C10 21 3 14 3 6a2 2 0 0 1 2-2Z"/></svg>
-            Call
-        </a>
-        <a href="{{ config('automercy.business.whatsapp_url') }}?text={{ rawurlencode('Hello Auto Mercy, I would like help finding a car.') }}" class="flex min-h-16 items-center justify-center gap-2 bg-whatsapp text-carbon" target="_blank" rel="noopener">
-            <svg class="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5Z"/><path d="M9 8.5c.5 3 2 4.5 5 5"/></svg>
-            WhatsApp
-        </a>
-    </div>
 </body>
 </html>

@@ -49,7 +49,15 @@
     }
 
     .mobile-nav-link {
-        @apply border-b border-border-default py-3 text-base font-semibold text-carbon last:border-0 hover:text-mercy-red;
+        @apply flex min-h-12 items-center rounded-button border border-transparent px-4 py-3 text-base font-semibold text-carbon transition-colors hover:border-mercy-red/30 hover:bg-mercy-red/5 hover:text-mercy-red;
+    }
+
+    .mobile-nav-link[aria-current='page'] {
+        @apply border-mercy-red bg-mercy-red text-pure-white shadow-card;
+    }
+
+    .mobile-menu-trigger[aria-expanded='true'] {
+        @apply border-mercy-red bg-mercy-red text-pure-white;
     }
 
     .footer-link {
