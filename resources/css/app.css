@@ -1,9 +1,9 @@
-@import 'tailwindcss';
-@import './theme.css';
-@import 'swiper/css';
-@import 'swiper/css/navigation';
-@import 'swiper/css/pagination';
-@import 'swiper/css/a11y';
+@import "tailwindcss";
+@import "./theme.css";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+@import "swiper/css/a11y";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -29,15 +29,15 @@
 
 @layer components {
     .btn-primary {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button bg-mercy-red px-5 py-3 text-button text-pure-white transition-colors hover:bg-mercy-red-dark;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button bg-mercy-red px-5 py-3 text-button text-pure-white shadow-sm transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:bg-mercy-red-dark hover:shadow-card;
     }
 
     .btn-secondary {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-carbon bg-transparent px-5 py-3 text-button text-carbon transition-colors hover:bg-carbon hover:text-pure-white;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-carbon bg-transparent px-5 py-3 text-button text-carbon transition-[background-color,color,transform] hover:-translate-y-px hover:bg-carbon hover:text-pure-white;
     }
 
     .btn-light {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-pure-white bg-pure-white px-5 py-3 text-button text-carbon transition-colors hover:bg-metallic;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-pure-white bg-pure-white px-5 py-3 text-button text-carbon shadow-sm transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:bg-pearl hover:shadow-card;
     }
 
     .btn-ghost-light {
@@ -48,20 +48,38 @@
         @apply relative py-7 text-sm font-semibold text-carbon transition-colors after:absolute after:inset-x-0 after:bottom-5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-mercy-red after:transition-transform hover:text-mercy-red hover:after:scale-x-100;
     }
 
+    .public-nav-link[aria-current="page"] {
+        @apply text-mercy-red after:scale-x-100;
+    }
+
+    .text-link {
+        @apply inline-flex items-center gap-2 text-sm font-semibold text-mercy-red underline decoration-gold decoration-2 underline-offset-4 transition-colors hover:text-mercy-red-dark;
+    }
+
     .mobile-nav-link {
         @apply flex min-h-12 items-center rounded-button border border-transparent px-4 py-3 text-base font-semibold text-carbon transition-colors hover:border-mercy-red/30 hover:bg-mercy-red/5 hover:text-mercy-red;
     }
 
-    .mobile-nav-link[aria-current='page'] {
+    .mobile-nav-link[aria-current="page"] {
         @apply border-mercy-red bg-mercy-red text-pure-white shadow-card;
     }
 
-    .mobile-menu-trigger[aria-expanded='true'] {
+    .mobile-menu-trigger[aria-expanded="true"] {
         @apply border-mercy-red bg-mercy-red text-pure-white;
     }
 
     .footer-link {
-        @apply text-metallic transition-colors hover:text-pure-white;
+        @apply text-white/70 transition-colors hover:text-pure-white;
+    }
+
+    .floating-whatsapp {
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: calc(max(1rem, env(safe-area-inset-bottom)) + var(--floating-whatsapp-lift, 0px));
+    }
+
+    .floating-whatsapp.is-collision-hidden {
+        pointer-events: none;
+        opacity: 0;
     }
 
     .field-label {
@@ -78,6 +96,61 @@
         overflow: hidden;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
+    }
+
+    [data-gallery-thumbnail][aria-pressed="true"] {
+        @apply border-mercy-red ring-2 ring-mercy-red ring-offset-2;
+    }
+
+    .vehicle-gallery-swiper {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .vehicle-gallery-swiper .swiper-wrapper,
+    .vehicle-gallery-swiper .swiper-slide {
+        height: 100%;
+        min-width: 0;
+    }
+
+    .vehicle-gallery-navigation {
+        @apply absolute top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-pure-white/95 text-carbon shadow-card backdrop-blur-sm transition-[background-color,color,transform,box-shadow] hover:bg-carbon hover:text-pure-white hover:shadow-card-hover disabled:cursor-not-allowed disabled:opacity-40;
+    }
+
+    .vehicle-gallery-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        width: 100vw;
+        height: 100dvh;
+        border: 0;
+        background: rgb(22 21 19 / 96%);
+    }
+
+    .vehicle-gallery-lightbox[hidden] {
+        display: none !important;
+    }
+
+    .vehicle-gallery-lightbox.is-open {
+        display: block;
+    }
+
+    .vehicle-lightbox-control {
+        @apply absolute z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-black/50 text-pure-white backdrop-blur-sm transition-[background-color,transform] hover:bg-mercy-red;
+    }
+
+    .vehicle-gallery-lightbox-image {
+        opacity: 1;
+        transform: scale(1);
+        transition:
+            opacity 220ms var(--ease-brand),
+            transform 220ms var(--ease-brand);
+    }
+
+    .vehicle-gallery-lightbox-image.is-changing {
+        opacity: 0.2;
+        transform: scale(0.985);
     }
 
     .latest-cars-carousel .swiper-wrapper {
@@ -108,7 +181,11 @@
         border: 0;
         background: var(--color-slate);
         opacity: 0.35;
-        transition: width var(--transition-duration-standard) var(--ease-brand), background-color var(--transition-duration-standard) var(--ease-brand), opacity var(--transition-duration-standard) var(--ease-brand);
+        transition:
+            width var(--transition-duration-standard) var(--ease-brand),
+            background-color var(--transition-duration-standard)
+                var(--ease-brand),
+            opacity var(--transition-duration-standard) var(--ease-brand);
     }
 
     .latest-cars-pagination .swiper-pagination-bullet-active {
@@ -133,6 +210,13 @@
     }
 }
 
+@media (min-width: 40rem) {
+    .floating-whatsapp {
+        right: max(1.5rem, env(safe-area-inset-right));
+        bottom: calc(max(1.5rem, env(safe-area-inset-bottom)) + var(--floating-whatsapp-lift, 0px));
+    }
+}
+
 @media (max-width: 63.999rem) {
     .latest-cars-carousel:not(.swiper-initialized) {
         overflow: visible;
@@ -146,7 +230,8 @@
         scrollbar-width: none;
     }
 
-    .latest-cars-carousel:not(.swiper-initialized) .swiper-wrapper::-webkit-scrollbar {
+    .latest-cars-carousel:not(.swiper-initialized)
+        .swiper-wrapper::-webkit-scrollbar {
         display: none;
     }
 

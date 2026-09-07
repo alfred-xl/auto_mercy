@@ -2,7 +2,10 @@
 
 namespace App\Enums;
 
-enum CarStatus: string
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum CarStatus: string implements HasColor, HasLabel
 {
     case Draft = 'draft';
     case Available = 'available';
@@ -18,6 +21,22 @@ enum CarStatus: string
             self::Reserved => 'Reserved',
             self::Sold => 'Sold',
             self::Archived => 'Archived',
+        };
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->label();
+    }
+
+    public function getColor(): string|array|null
+    {
+        return match ($this) {
+            self::Draft => 'gray',
+            self::Available => 'success',
+            self::Reserved => 'warning',
+            self::Sold => 'info',
+            self::Archived => 'gray',
         };
     }
 

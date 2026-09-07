@@ -211,25 +211,25 @@ Re-test any opacity, overlay, hover, disabled, photographic, or newly introduced
 ### Display family
 
 ```css
-"Instrument Serif", Georgia, "Times New Roman", serif
+"Fraunces", serif
 ```
 
-Use Instrument Serif sparingly for hero headings, major section headings, campaign statements, editorial quotations, and large brand messages. Current approved implementation weight: 400.
+Use Fraunces for page and section headings, prices, pull quotes, large brand messages, and the Auto Mercy wordmark. Approved weights are 500, 600, and 700; 600 is the default headline weight and 700 is reserved for hero-scale emphasis.
 
-Never use it for vehicle names, prices, specifications, buttons, small labels, forms, filters, navigation, or future admin interfaces.
+Never use Fraunces below 15px or for body paragraphs, buttons, form fields, navigation, specifications, labels, or admin interface controls.
 
 ### Interface and body family
 
 ```css
-"DM Sans", Inter, Arial, sans-serif
+"Inter", sans-serif
 ```
 
-Use DM Sans for all functional information: navigation, copy, buttons, prices, vehicle names and metadata, filters, forms, statuses, footer content, mobile interfaces, and future admin interfaces. Approved implementation weights: 400, 500, 600, and 700.
+Use Inter for all UI and body text: navigation, copy, buttons, labels, inputs, captions, badges, tables, metadata, filters, statuses, footer content, mobile interfaces, and admin interfaces. Approved weights are 400, 500, 600, and 700.
 
 ### Principles
 
-- Standard body copy is 16px or larger.
-- Use 14px only for genuinely secondary small text and metadata.
+- Standard body copy is 14–15px.
+- Meta text and captions are 12–13px.
 - Avoid extremely thin weights and excessive uppercase.
 - Uppercase is reserved for short labels with increased letter spacing.
 - Keep paragraphs generously led and generally within 60–75 characters per line.
@@ -246,21 +246,21 @@ The CSS-first theme exposes these utilities and tokens:
 
 | Role | Utility | Size | Weight / line height |
 | --- | --- | --- | --- |
-| Display | `text-display` | `clamp(3rem, 7vw, 5.5rem)` | 400 / 0.95 |
-| H1 | `text-h1` | `clamp(2.5rem, 5vw, 4.5rem)` | 400 / 1 |
-| H2 | `text-h2` | `clamp(2.125rem, 4vw, 3.5rem)` | 400 / 1.05 |
-| H3 | `text-h3` | `clamp(1.75rem, 3vw, 2.5rem)` | 400 / 1.1 |
-| H4 | `text-h4` | `clamp(1.25rem, 2vw, 1.5rem)` | 600 / 1.2 |
-| Large body | `text-body-lg` | 1.125rem | 400 / 1.7 |
-| Standard body | `text-body` | 1rem | 400 / 1.65 |
+| Display | `text-display` | `clamp(3rem, 5vw, 3.5rem)` | 600 / 1 |
+| H1 | `text-h1` | `clamp(2rem, 4vw, 2.375rem)` | 600 / 1.05 |
+| H2 | `text-h2` | `clamp(1.75rem, 3vw, 2rem)` | 600 / 1.1 |
+| H3 | `text-h3` | `clamp(1.125rem, 2vw, 1.25rem)` | 600 / 1.2 |
+| H4 | `text-h4` | `clamp(1.125rem, 2vw, 1.25rem)` | 600 / 1.2 |
+| Large body | `text-body-lg` | 1rem | 400 / 1.65 |
+| Standard body | `text-body` | 0.9375rem | 400 / 1.65 |
 | Small body | `text-body-sm` | 0.875rem | 400 / 1.55 |
-| Label | `text-label` | 0.875rem | 600 / 1.35, 0.08em tracking |
-| Button | `text-button` | 1rem | 600 / 1.25 |
-| Vehicle price | `text-vehicle-price` | `clamp(1.5rem, 3vw, 2.25rem)` | 700 / 1.1 |
-| Vehicle name | `text-vehicle-name` | `clamp(1.125rem, 2vw, 1.375rem)` | 600 / 1.25 |
-| Vehicle metadata | `text-vehicle-meta` | 0.875rem | 500 / 1.5 |
+| Label | `text-label` | 0.75rem | 600 / 1.35, 0.08em tracking |
+| Button | `text-button` | 0.875rem | 600 / 1.25 |
+| Vehicle price | `text-vehicle-price` | `clamp(1.125rem, 3vw, 2.125rem)` | 600 / 1.1 |
+| Vehicle name | `text-vehicle-name` | `clamp(1.125rem, 2vw, 1.25rem)` | 600 / 1.25 |
+| Vehicle metadata | `text-vehicle-meta` | 0.8125rem | 500 / 1.5 |
 
-Use `font-display` only with the display and H1–H3 roles when the content is editorial. Use `font-sans` for H4 and every functional vehicle role. Avoid headings whose minimum size or line count consumes an entire mobile viewport.
+Use `font-display` for H1–H3, prices, pull quotes, and the wordmark. Use `font-sans` for UI controls and body content. Never introduce a third typeface. Avoid headings whose minimum size or line count consumes an entire mobile viewport.
 
 ## 14. Photography direction
 
@@ -378,8 +378,8 @@ A future vehicle card contains only the information needed to understand and ope
 
 1. Actual vehicle image in a consistent 4:3 ratio
 2. Text-labelled availability status
-3. Year, make, and model in DM Sans
-4. Price in DM Sans
+3. Year, make, and model in Fraunces as the card heading
+4. Price in Fraunces
 5. A short set of essential metadata
 6. The approved car-stand location
 7. Clear **View Details** action
@@ -404,7 +404,7 @@ Use a consistent badge shape and optional supporting icon, but never an icon or 
 ## 20. Form guidance
 
 - Use persistent labels for text, telephone, email, select, search, and textarea fields. A placeholder is never the only label.
-- Use DM Sans at 16px for normal input text to protect mobile readability.
+- Use Inter at 16px for normal input text to protect mobile readability.
 - Give fields at least a 44px touch height, 8px corners, a Pure White surface, Carbon text, and a Slate Grey boundary. Metallic Silver alone is too low-contrast to identify an interactive field on white.
 - Focus uses a visible Mercy Red border/ring with sufficient separation from the background.
 - Help text uses Slate Grey on Pure White or Pearl Grey and remains at least 14px.
@@ -502,7 +502,7 @@ Accessibility is part of the premium experience, not a visual compromise.
 - “Confirm current availability.”
 - “Nationwide delivery available. Confirm delivery costs based on your destination.”
 - “Reserve this car for 14 days with a ₦500,000 non-refundable vehicle reservation deposit. Complete the outstanding payment within 14 days. If payment is not completed, the deposit will be forfeited to cover administrative and vehicle-holding costs.”
-- A vehicle price, name, specification, or button set in DM Sans.
+- A vehicle price or headline set in Fraunces, with specifications and buttons set in Inter.
 - A WhatsApp button using WhatsApp Green, Carbon text, a WhatsApp icon, and a visible action label.
 - An **Available** label presented as text as well as Forest Green.
 
@@ -520,7 +520,7 @@ Accessibility is part of the premium experience, not a visual compromise.
 - Using the company motto as the primary sales tagline.
 - Recolouring, stretching, shadowing, redrawing, or AI-replacing the logo.
 - Forcing the detailed circular logo into a small header or favicon.
-- Setting prices, specifications, buttons, or small labels in Instrument Serif.
+- Setting body paragraphs, specifications, buttons, form controls, navigation, or small labels in Fraunces.
 - Using Mercy Red text on Carbon Black or white text on WhatsApp Green.
 - Using WhatsApp Green for a generic success message.
 - Colour-only statuses, placeholder-only form labels, or inaccessible icon-only actions.
@@ -582,6 +582,6 @@ The branding audit found these pre-existing starter-state conflicts:
 - `README.md`, the Composer project description, and the application-name environment defaults remain generic Laravel starter content. They should be aligned during project-information and application-configuration work without rewriting unrelated setup guidance.
 - `public/favicon.ico` is a zero-byte placeholder and cannot be used as a brand asset.
 - No source logo, editable logo artwork, source photography, or source font files were present.
-- The original Vite configuration loaded Instrument Sans. This direct theme conflict was resolved by configuring the approved DM Sans and Instrument Serif families through the existing font pipeline.
+- The Vite configuration loads only the approved Inter and Fraunces families through the existing font pipeline.
 
 These deferred items must not be treated as approved Auto Mercy design. They remain unchanged only where this phase explicitly prohibited page building or where a missing source asset prevents responsible production.

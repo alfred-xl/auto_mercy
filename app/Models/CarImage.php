@@ -2,40 +2,77 @@
 
 namespace App\Models;
 
+use App\Enums\ImageProcessingStatus;
 use Database\Factories\CarImageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['alt_text', 'caption'])]
+#[Fillable(['path', 'derivatives', 'alt_text', 'sort_order', 'processing_status', 'processing_error'])]
 class CarImage extends Model
 {
     /** @use HasFactory<CarImageFactory> */
     use HasFactory;
-
-    use SoftDeletes;
 
     public function car(): BelongsTo
     {
         return $this->belongsTo(Car::class);
     }
 
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
     public function getUrlAttribute(): string
     {
-        return Storage::disk($this->disk)->url($this->path);
+        return $this->variantUrl('large');
     }
 
-    /** @return array<string, string> */
+    public function variantPath(string $variant, string $format = 'webp'): string
+    {
+        return data_get($this->derivatives, "{$variant}.{$format}.path")
+            ?? data_get($this->derivatives, "{$variant}.path")
+            ?? $this->path;
+    }
+
+    public function variantUrl(string $variant, string $format = 'webp'): string
+    {
+        return Storage::disk((string) config('automercy.media.disk'))->url($this->variantPath($variant, $format));
+    }
+
+    public function hasVariant(string $variant, string $format = 'webp'): bool
+    {
+        return filled(data_get($this->derivatives, "{$variant}.{$format}.path"));
+    }
+
+    public function srcset(string $format = 'webp'): string
+    {
+        return collect(['card', 'medium', 'large'])->map(function (string $variant) use ($format): ?string {
+            $width = data_get($this->derivatives, "{$variant}.{$format}.width");
+
+            return $width && $this->hasVariant($variant, $format)
+                ? $this->variantUrl($variant, $format).' '.$width.'w'
+                : null;
+        })->filter()->implode(', ');
+    }
+
+    /** @return list<string> */
+    public function storedPaths(): array
+    {
+        $derivativePaths = collect($this->derivatives ?? [])
+            ->flatMap(fn (array $formats): array => collect($formats)->pluck('path')->filter()->values()->all());
+
+        return $derivativePaths
+            ->prepend($this->path)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     protected function casts(): array
     {
-        return ['derivatives' => 'array'];
+        return [
+            'derivatives' => 'array',
+            'processing_status' => ImageProcessingStatus::class,
+        ];
     }
 }

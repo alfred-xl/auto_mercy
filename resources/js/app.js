@@ -1,5 +1,5 @@
 import Swiper from 'swiper';
-import { A11y, Keyboard, Navigation, Pagination } from 'swiper/modules';
+import { A11y, Autoplay, Keyboard, Navigation, Pagination } from 'swiper/modules';
 
 const trigger = document.querySelector('[data-mobile-menu-trigger]');
 const menu = document.querySelector('[data-mobile-menu]');
@@ -258,6 +258,75 @@ document.querySelectorAll('[data-inventory-filter-form], [data-inventory-sort-fo
     });
 });
 
+const floatingWhatsapp = document.querySelector('[data-floating-whatsapp]');
+
+if (floatingWhatsapp) {
+    const collisionTargets = [...document.querySelectorAll('[data-floating-whatsapp-avoid]')]
+        .filter((target) => target !== floatingWhatsapp);
+    let collisionFrame;
+
+    const updateFloatingWhatsappPosition = () => {
+        const viewportMargin = window.innerWidth >= 640 ? 24 : 16;
+        const collisionGap = 12;
+        const width = floatingWhatsapp.offsetWidth;
+        const height = floatingWhatsapp.offsetHeight;
+        const baseRect = {
+            left: window.innerWidth - viewportMargin - width,
+            right: window.innerWidth - viewportMargin,
+            top: window.innerHeight - viewportMargin - height,
+            bottom: window.innerHeight - viewportMargin,
+        };
+        let requiredLift = 0;
+
+        for (let pass = 0; pass < collisionTargets.length; pass += 1) {
+            const currentTop = baseRect.top - requiredLift;
+            const currentBottom = baseRect.bottom - requiredLift;
+            let foundCollision = false;
+
+            collisionTargets.forEach((target) => {
+                const targetRect = target.getBoundingClientRect();
+                const overlapsHorizontally = baseRect.right > targetRect.left - collisionGap
+                    && baseRect.left < targetRect.right + collisionGap;
+                const overlapsVertically = currentBottom > targetRect.top - collisionGap
+                    && currentTop < targetRect.bottom + collisionGap;
+
+                if (!overlapsHorizontally || !overlapsVertically) {
+                    return;
+                }
+
+                requiredLift = Math.max(
+                    requiredLift,
+                    baseRect.bottom - targetRect.top + collisionGap,
+                );
+                foundCollision = true;
+            });
+
+            if (!foundCollision) {
+                break;
+            }
+        }
+
+        const maximumVisibleLift = Math.max(0, baseRect.top - viewportMargin);
+        const cannotFitWithoutCoveringContent = requiredLift > maximumVisibleLift;
+
+        floatingWhatsapp.classList.toggle('is-collision-hidden', cannotFitWithoutCoveringContent);
+        floatingWhatsapp.style.setProperty(
+            '--floating-whatsapp-lift',
+            `${Math.min(requiredLift, maximumVisibleLift)}px`,
+        );
+    };
+
+    const scheduleFloatingWhatsappUpdate = () => {
+        window.cancelAnimationFrame(collisionFrame);
+        collisionFrame = window.requestAnimationFrame(updateFloatingWhatsappPosition);
+    };
+
+    updateFloatingWhatsappPosition();
+    window.addEventListener('load', scheduleFloatingWhatsappUpdate);
+    window.addEventListener('resize', scheduleFloatingWhatsappUpdate);
+    window.addEventListener('scroll', scheduleFloatingWhatsappUpdate, { passive: true });
+}
+
 const shareInventory = document.querySelector('[data-share-inventory]');
 
 if (shareInventory) {
@@ -296,6 +365,75 @@ if (shareInventory) {
     });
 }
 
+document.querySelectorAll('[data-share-vehicle]').forEach((button) => {
+    const label = button.querySelector('[data-share-vehicle-label]');
+    const status = button.parentElement?.querySelector('[data-share-vehicle-status]');
+    let resetLabelTimeout;
+
+    const copyCurrentUrl = async () => {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(window.location.href);
+            return;
+        }
+
+        const temporaryInput = document.createElement('textarea');
+        temporaryInput.value = window.location.href;
+        temporaryInput.style.position = 'fixed';
+        temporaryInput.style.opacity = '0';
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+        const copied = document.execCommand('copy');
+        temporaryInput.remove();
+
+        if (!copied) {
+            throw new Error('Copy command failed.');
+        }
+    };
+
+    const announce = (message) => {
+        if (label) {
+            label.textContent = message;
+            window.clearTimeout(resetLabelTimeout);
+            resetLabelTimeout = window.setTimeout(() => {
+                label.textContent = 'Share';
+            }, 2500);
+        }
+
+        if (status) {
+            status.textContent = message;
+        }
+    };
+
+    button.addEventListener('click', async () => {
+        const shareData = {
+            title: button.dataset.shareTitle || document.title,
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+                announce('Shared');
+                return;
+            }
+
+            await copyCurrentUrl();
+            announce('Link copied');
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                return;
+            }
+
+            try {
+                await copyCurrentUrl();
+                announce('Link copied');
+            } catch {
+                announce('Unable to share');
+            }
+        }
+    });
+});
+
 document.querySelectorAll('[data-save-vehicle]').forEach((button) => {
     const storageKey = `auto-mercy:saved:${button.dataset.saveVehicle}`;
     const outlineIcon = button.querySelector('[data-save-icon-outline]');
@@ -322,6 +460,350 @@ document.querySelectorAll('[data-save-vehicle]').forEach((button) => {
             window.localStorage.setItem(storageKey, String(saved));
         } catch {
             // The visual toggle remains available when storage is restricted.
+        }
+    });
+});
+
+document.querySelectorAll('[data-vehicle-gallery]').forEach((gallery) => {
+    const swiperElement = gallery.querySelector('[data-gallery-swiper]');
+    const originalSlides = [...gallery.querySelectorAll('[data-gallery-slide]')];
+    const thumbnails = [...gallery.querySelectorAll('[data-gallery-thumbnail]')];
+    const previous = gallery.querySelector('[data-gallery-previous]');
+    const next = gallery.querySelector('[data-gallery-next]');
+    const lightbox = gallery.querySelector('[data-gallery-lightbox]');
+    const lightboxImage = gallery.querySelector('[data-gallery-lightbox-image]');
+    const lightboxClose = gallery.querySelector('[data-gallery-lightbox-close]');
+    const lightboxPrevious = gallery.querySelector('[data-gallery-lightbox-previous]');
+    const lightboxNext = gallery.querySelector('[data-gallery-lightbox-next]');
+    const lightboxCount = gallery.querySelector('[data-gallery-lightbox-count]');
+
+    if (!swiperElement || originalSlides.length === 0) {
+        return;
+    }
+
+    const hasMultipleImages = originalSlides.length > 1;
+    const initialIndex = Math.min(
+        Number.parseInt(gallery.dataset.galleryInitialIndex || '0', 10),
+        originalSlides.length - 1,
+    );
+    const autoplayDelay = Number.parseInt(gallery.dataset.galleryAutoplayDelay || '4500', 10);
+    let lightboxIndex = initialIndex;
+    let lightboxTransitionTimeout;
+    let resumeAutoplayTimeout;
+    let returnFocus = null;
+    let pointerStartX = null;
+    const isLightboxOpen = () => lightbox && !lightbox.hidden && lightbox.classList.contains('is-open');
+
+    const imageAt = (index) => {
+        const normalizedIndex = (index + originalSlides.length) % originalSlides.length;
+        const slide = originalSlides[normalizedIndex];
+
+        return {
+            index: normalizedIndex,
+            src: slide.dataset.galleryImage,
+            srcset: slide.dataset.gallerySrcset,
+            alt: slide.dataset.galleryAlt || '',
+        };
+    };
+
+    const syncThumbnail = (index) => {
+        thumbnails.forEach((thumbnail, thumbnailIndex) => {
+            thumbnail.setAttribute('aria-pressed', String(thumbnailIndex === index));
+        });
+
+        const activeThumbnail = thumbnails[index];
+
+        if (activeThumbnail && hasMultipleImages) {
+            const thumbnailStrip = activeThumbnail.parentElement;
+            const targetLeft = activeThumbnail.offsetLeft
+                - ((thumbnailStrip.clientWidth - activeThumbnail.offsetWidth) / 2);
+
+            thumbnailStrip.scrollTo({
+                left: Math.max(0, targetLeft),
+                behavior: reducedMotionMedia.matches ? 'auto' : 'smooth',
+            });
+        }
+    };
+
+    const swiper = new Swiper(swiperElement, {
+        modules: [A11y, Autoplay, Keyboard, Navigation],
+        initialSlide: initialIndex,
+        loop: hasMultipleImages,
+        speed: reducedMotionMedia.matches ? 0 : 700,
+        grabCursor: hasMultipleImages,
+        watchOverflow: true,
+        keyboard: {
+            enabled: hasMultipleImages,
+            onlyInViewport: true,
+        },
+        navigation: hasMultipleImages
+            ? {
+                prevEl: previous,
+                nextEl: next,
+            }
+            : false,
+        autoplay: hasMultipleImages && !reducedMotionMedia.matches
+            ? {
+                delay: autoplayDelay,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            }
+            : false,
+        a11y: {
+            enabled: true,
+            prevSlideMessage: 'Previous vehicle photo',
+            nextSlideMessage: 'Next vehicle photo',
+            firstSlideMessage: 'This is the first vehicle photo',
+            lastSlideMessage: 'This is the last vehicle photo',
+        },
+        on: {
+            init(instance) {
+                syncThumbnail(instance.realIndex);
+            },
+            realIndexChange(instance) {
+                syncThumbnail(instance.realIndex);
+            },
+        },
+    });
+
+    const pauseThenResumeAutoplay = () => {
+        if (!swiper.autoplay || reducedMotionMedia.matches) {
+            return;
+        }
+
+        swiper.autoplay.stop();
+        window.clearTimeout(resumeAutoplayTimeout);
+        resumeAutoplayTimeout = window.setTimeout(() => {
+            if (!isLightboxOpen() && !document.hidden) {
+                swiper.autoplay.start();
+            }
+        }, 7000);
+    };
+
+    thumbnails.forEach((thumbnail, index) => {
+        thumbnail.addEventListener('click', () => {
+            swiper.slideToLoop(index);
+            pauseThenResumeAutoplay();
+        });
+    });
+
+    [previous, next].forEach((control) => {
+        control?.addEventListener('click', pauseThenResumeAutoplay);
+    });
+
+    const updateLightbox = (index, animate = true) => {
+        if (!lightboxImage) {
+            return;
+        }
+
+        const image = imageAt(index);
+        lightboxIndex = image.index;
+
+        const applyImage = () => {
+            lightboxImage.src = image.src;
+            lightboxImage.alt = image.alt;
+
+            if (image.srcset) {
+                lightboxImage.srcset = image.srcset;
+            } else {
+                lightboxImage.removeAttribute('srcset');
+            }
+
+            if (lightboxCount) {
+                lightboxCount.textContent = `${image.index + 1} / ${originalSlides.length}`;
+            }
+
+            swiper.slideToLoop(image.index);
+            window.requestAnimationFrame(() => lightboxImage.classList.remove('is-changing'));
+        };
+
+        window.clearTimeout(lightboxTransitionTimeout);
+
+        if (!animate || reducedMotionMedia.matches) {
+            applyImage();
+            return;
+        }
+
+        lightboxImage.classList.add('is-changing');
+        lightboxTransitionTimeout = window.setTimeout(applyImage, 180);
+    };
+
+    const openLightbox = (trigger) => {
+        if (!lightbox || !lightboxImage || isLightboxOpen()) {
+            return;
+        }
+
+        returnFocus = trigger;
+        updateLightbox(swiper.realIndex, false);
+        swiper.autoplay?.stop();
+        swiper.keyboard?.disable();
+        lightboxImage.draggable = false;
+        lightbox.hidden = false;
+        lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.classList.add('is-open');
+        document.body.classList.add('overflow-hidden');
+        lightboxClose?.focus();
+    };
+
+    const closeLightbox = () => {
+        if (!isLightboxOpen()) {
+            return;
+        }
+
+        lightbox.classList.remove('is-open');
+        lightbox.hidden = true;
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightbox.dispatchEvent(new Event('close'));
+    };
+
+    const showPreviousLightboxImage = () => {
+        updateLightbox(lightboxIndex - 1);
+        pauseThenResumeAutoplay();
+    };
+
+    const showNextLightboxImage = () => {
+        updateLightbox(lightboxIndex + 1);
+        pauseThenResumeAutoplay();
+    };
+
+    swiperElement.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-gallery-lightbox-trigger]');
+
+        if (trigger && swiper.allowClick) {
+            openLightbox(trigger);
+        }
+    });
+
+    lightboxClose?.addEventListener('click', closeLightbox);
+    lightboxPrevious?.addEventListener('click', showPreviousLightboxImage);
+    lightboxNext?.addEventListener('click', showNextLightboxImage);
+
+    lightbox?.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeLightbox();
+            return;
+        }
+
+        if (!hasMultipleImages) {
+            return;
+        }
+
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            showPreviousLightboxImage();
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            showNextLightboxImage();
+        }
+    });
+
+    lightbox?.querySelector('[data-gallery-lightbox-stage]')?.addEventListener('click', (event) => {
+        if (event.target === event.currentTarget) {
+            closeLightbox();
+        }
+    });
+
+    lightboxImage?.addEventListener('pointerdown', (event) => {
+        pointerStartX = event.clientX;
+    });
+
+    lightboxImage?.addEventListener('pointerup', (event) => {
+        if (!hasMultipleImages || pointerStartX === null) {
+            return;
+        }
+
+        const distance = event.clientX - pointerStartX;
+        pointerStartX = null;
+
+        if (Math.abs(distance) < 45) {
+            return;
+        }
+
+        if (distance > 0) {
+            showPreviousLightboxImage();
+        } else {
+            showNextLightboxImage();
+        }
+    });
+
+    lightboxImage?.addEventListener('pointercancel', () => {
+        pointerStartX = null;
+    });
+
+    lightbox?.addEventListener('close', () => {
+        lightbox.hidden = true;
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('overflow-hidden');
+        swiper.keyboard?.enable();
+
+        if (swiper.autoplay && !reducedMotionMedia.matches && !document.hidden) {
+            swiper.autoplay.start();
+        }
+
+        returnFocus?.focus();
+        returnFocus = null;
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!swiper.autoplay) {
+            return;
+        }
+
+        if (document.hidden) {
+            swiper.autoplay.stop();
+        } else if (!isLightboxOpen()) {
+            swiper.autoplay.start();
+        }
+    });
+});
+
+document.querySelectorAll('[data-request-modal]').forEach((modal) => {
+    const triggers = document.querySelectorAll(`[data-request-modal-trigger="${modal.id}"]`);
+    const closeButtons = modal.querySelectorAll('[data-request-modal-close]');
+    let returnFocus = null;
+
+    const openModal = (trigger = null) => {
+        returnFocus = trigger;
+
+        if (typeof modal.showModal === 'function') {
+            modal.showModal();
+        } else {
+            modal.setAttribute('open', '');
+        }
+    };
+
+    const closeModal = () => {
+        if (typeof modal.close === 'function') {
+            modal.close();
+        } else {
+            modal.removeAttribute('open');
+            returnFocus?.focus();
+        }
+    };
+
+    triggers.forEach((trigger) => trigger.addEventListener('click', () => openModal(trigger)));
+    closeButtons.forEach((button) => button.addEventListener('click', closeModal));
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    modal.addEventListener('close', () => returnFocus?.focus());
+
+    if (modal.dataset.openOnLoad === 'true') {
+        window.requestAnimationFrame(() => openModal(triggers[0] ?? null));
+    }
+
+    modal.querySelector('[data-request-form]')?.addEventListener('submit', (event) => {
+        event.currentTarget.setAttribute('aria-busy', 'true');
+        const submitButton = event.currentTarget.querySelector('[data-request-submit]');
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending…';
         }
     });
 });

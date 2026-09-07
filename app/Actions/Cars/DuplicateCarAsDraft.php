@@ -2,6 +2,7 @@
 
 namespace App\Actions\Cars;
 
+use App\Enums\CarStatus;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -10,46 +11,24 @@ use Illuminate\Support\Facades\Gate;
 class DuplicateCarAsDraft
 {
     /** @var list<string> */
-    private const COPIED_ATTRIBUTES = [
-        'make_id',
-        'car_model_id',
-        'body_type_id',
-        'car_stand_id',
-        'trim',
-        'year',
-        'price_amount',
-        'currency',
-        'mileage',
-        'mileage_unit',
-        'condition',
-        'transmission',
-        'fuel_type',
-        'drivetrain',
-        'engine',
-        'exterior_colour',
-        'interior_colour',
-        'description',
-        'supplemental_specs',
-        'video_url',
+    private const ATTRIBUTES = [
+        'listing_category', 'make', 'model', 'trim', 'year', 'body_type',
+        'price_amount', 'previous_price_amount', 'mileage', 'mileage_unit',
+        'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour',
+        'interior_colour', 'features', 'description',
     ];
 
     public function execute(Car $source, User $actor): Car
     {
-        Gate::forUser($actor)->authorize('view', $source);
-        Gate::forUser($actor)->authorize('update', $source);
         Gate::forUser($actor)->authorize('create', Car::class);
 
-        return DB::transaction(function () use ($source, $actor): Car {
-            $lockedSource = Car::query()->lockForUpdate()->findOrFail($source->getKey());
+        return DB::transaction(function () use ($source): Car {
             $duplicate = new Car;
             $duplicate->forceFill([
-                ...$lockedSource->only(self::COPIED_ATTRIBUTES),
+                ...$source->only(self::ATTRIBUTES),
+                'status' => CarStatus::Draft,
                 'is_featured' => false,
-                'created_by' => $actor->getKey(),
-                'updated_by' => $actor->getKey(),
             ])->save();
-
-            $duplicate->features()->sync($lockedSource->features()->pluck('features.id'));
 
             return $duplicate->refresh();
         });

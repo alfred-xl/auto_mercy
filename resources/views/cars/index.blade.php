@@ -1,21 +1,15 @@
 <x-layouts.public-layout
-    title="Available Cars in Lagos | Auto Mercy"
-    description="Browse quality foreign-used cars currently available from Auto Mercy in Lagos. Filter by make, model, specifications, price, or car stand."
+    title="Vehicle Inventory in Lagos | Auto Mercy"
+    description="Browse brand-new, foreign-used, and pre-order cars currently available from Auto Mercy. Filter by category, make, model, specifications, and price."
     :canonical="$canonical"
     :robots="$robots"
 >
-    <header class="border-b border-white/10 bg-carbon py-9 text-pure-white md:py-11">
-        <div class="mx-auto max-w-site px-gutter">
-            <nav class="flex items-center gap-2 text-sm text-white/60" aria-label="Breadcrumb">
-                <a href="{{ route('home') }}" class="transition-colors hover:text-pure-white">Home</a>
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="m7.5 4.5 5 5.5-5 5.5"/></svg>
-                <span aria-current="page" class="text-white/85">Available Cars</span>
-            </nav>
-            <div class="mt-7 border-l-2 border-mercy-red pl-5">
-                <p class="text-xs font-bold uppercase tracking-label text-metallic">Auto Mercy Inventory</p>
-                <h1 class="mt-2 font-display text-h1">Available Cars</h1>
-                <p class="mt-3 max-w-2xl text-white/70">Browse quality foreign-used cars currently available from our Lagos car stands.</p>
-            </div>
+    <header class="relative isolate flex min-h-[18rem] items-center justify-center overflow-hidden bg-carbon text-center text-pure-white sm:min-h-[20rem]">
+        <img src="{{ asset('images/auto-mercy-hero.webp') }}" width="1792" height="1024" alt="" fetchpriority="high" class="absolute inset-0 -z-20 h-full w-full object-cover object-center">
+        <div class="absolute inset-0 -z-10 bg-carbon/60" aria-hidden="true"></div>
+        <div class="mx-auto w-full max-w-site px-gutter py-16">
+            <h1 class="font-display text-h1 font-semibold tracking-display">Inventory</h1>
+            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">Browse quality brand-new, foreign-used, and pre-order vehicles available from Auto Mercy.</p>
         </div>
     </header>
 
@@ -34,10 +28,10 @@
             <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
                 <x-inventory-filters
                     :filters="$filters"
+                    :categories="$categories"
                     :makes="$makes"
                     :models="$models"
                     :body-types="$bodyTypes"
-                    :stands="$stands"
                     :transmissions="$transmissions"
                     :fuels="$fuels"
                     prefix="mobile-inventory"
@@ -47,19 +41,19 @@
         </section>
     </div>
 
-    <section class="bg-surface-secondary py-10 md:py-14" aria-labelledby="inventory-results-heading">
+    <section class="bg-surface-secondary py-section" aria-labelledby="inventory-results-heading">
         <div class="mx-auto grid max-w-site gap-8 px-gutter lg:grid-cols-[minmax(17.5rem,20rem)_minmax(0,1fr)] lg:items-start">
             <aside class="hidden rounded-card border border-border-default bg-pure-white p-5 lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto" aria-label="Filter available cars">
                 <div class="mb-6 border-b border-border-default pb-5">
-                    <p class="text-xs font-bold uppercase tracking-label text-mercy-red">Find your car</p>
+                    <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Find your car</p>
                     <h2 class="mt-2 text-xl font-semibold text-carbon">Filter inventory</h2>
                 </div>
                 <x-inventory-filters
                     :filters="$filters"
+                    :categories="$categories"
                     :makes="$makes"
                     :models="$models"
                     :body-types="$bodyTypes"
-                    :stands="$stands"
                     :transmissions="$transmissions"
                     :fuels="$fuels"
                     prefix="desktop-inventory"
@@ -71,7 +65,7 @@
                     <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                         <div>
                             <p id="inventory-results-heading" class="text-lg font-semibold text-carbon" tabindex="-1">{{ $cars->total() }} {{ Str::plural('car', $cars->total()) }} found</p>
-                            <p class="mt-1 text-sm text-text-secondary">Published inventory from our Lagos car stands.</p>
+                            <p class="mt-1 text-sm text-text-secondary">Published inventory from our Lagos locations.</p>
                         </div>
                         <div class="flex flex-wrap items-end gap-3">
                             <button type="button" class="btn-secondary relative px-4 lg:hidden" data-inventory-filter-trigger aria-expanded="false" aria-controls="inventory-filter-drawer">
@@ -118,12 +112,12 @@
 
                 @if ($hasFilterErrors)
                     <div class="mt-7 rounded-card border border-mercy-red/30 bg-pure-white px-6 py-12 text-center">
-                        <h2 class="font-display text-3xl">Some filters need attention</h2>
+                        <h2 class="text-2xl font-semibold">Some filters need attention</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Review the highlighted values and apply the filters again. No inventory has been shown for the invalid request.</p>
                         <button type="button" class="btn-primary mt-6 lg:hidden" data-inventory-filter-trigger aria-expanded="false" aria-controls="inventory-filter-drawer">Review Filters</button>
                     </div>
                 @elseif ($cars->isNotEmpty())
-                    <div class="mt-7 grid gap-grid md:grid-cols-2 xl:grid-cols-3">
+                    <div class="mt-7 grid gap-grid md:grid-cols-2">
                         @foreach ($cars as $car)
                             <x-vehicle-card :car="$car" />
                         @endforeach
@@ -134,13 +128,13 @@
                 @elseif (! $hasPublicInventory)
                     <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
                         <img src="{{ asset('images/auto-mercy-logo.webp') }}" width="80" height="80" alt="" loading="lazy" class="mx-auto h-20 w-20 object-contain opacity-70">
-                        <h2 class="mt-5 font-display text-3xl">Available cars are being updated</h2>
-                        <p class="mx-auto mt-3 max-w-xl text-text-secondary">There are no published Available cars online right now. Call or message Auto Mercy to confirm the current inventory at our Lagos car stands.</p>
+                        <h2 class="mt-5 text-2xl font-semibold">Available cars are being updated</h2>
+                        <p class="mx-auto mt-3 max-w-xl text-text-secondary">There are no active vehicles online right now. Call or message Auto Mercy to confirm the current inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call {{ config('automercy.business.phone_display') }}</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
                     </div>
                 @else
                     <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
-                        <h2 class="font-display text-3xl">No cars match these filters</h2>
+                        <h2 class="text-2xl font-semibold">No cars match these filters</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Remove one criterion above or clear all filters to browse the complete Available inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ route('cars.index') }}" class="btn-secondary">Clear All</a><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call Auto Mercy</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
                     </div>

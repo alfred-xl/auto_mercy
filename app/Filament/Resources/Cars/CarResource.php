@@ -17,17 +17,27 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class CarResource extends Resource
 {
     protected static ?string $model = Car::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $recordRouteKeyName = 'id';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Inventory';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
-    protected static ?string $recordTitleAttribute = 'stock_number';
+    protected static ?string $navigationLabel = 'Vehicles';
+
+    protected static ?string $modelLabel = 'Vehicle';
+
+    protected static ?string $pluralModelLabel = 'Vehicles';
+
+    protected static ?string $slug = 'vehicles';
+
+    protected static ?int $navigationSort = 10;
+
+    protected static ?string $recordTitleAttribute = 'display_name';
 
     public static function form(Schema $schema): Schema
     {
@@ -44,11 +54,18 @@ class CarResource extends Resource
         return CarsTable::configure($table);
     }
 
+    public static function getUrl(?string $name = null, array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false, ?string $configuration = null): string
+    {
+        if (($parameters['record'] ?? null) instanceof Car) {
+            $parameters['record'] = $parameters['record']->getKey();
+        }
+
+        return parent::getUrl($name, $parameters, $isAbsolute, $panel, $tenant, $shouldGuessMissingParameters, $configuration);
+    }
+
     public static function getRelations(): array
     {
-        return [
-            ImagesRelationManager::class,
-        ];
+        return [ImagesRelationManager::class];
     }
 
     public static function getPages(): array
@@ -61,16 +78,8 @@ class CarResource extends Resource
         ];
     }
 
-    public static function getRecordRouteBindingEloquentQuery(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
-
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['make', 'carModel', 'carStand']);
+        return parent::getEloquentQuery()->with(['coverImage', 'images']);
     }
 }

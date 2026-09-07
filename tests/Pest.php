@@ -35,8 +35,7 @@ pest()->extend(TestCase::class)
 function createPublishableCar(array $attributes = []): Car
 {
     $car = Car::factory()->create($attributes);
-    $image = CarImage::factory()->for($car)->create();
-    $car->forceFill(['primary_image_id' => $image->id])->save();
+    CarImage::factory()->for($car)->create();
 
     return $car->refresh();
 }

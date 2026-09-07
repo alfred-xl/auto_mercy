@@ -1,50 +1,66 @@
 {
-  "_dm-sans-400-normal-BwCSEQnW.woff": {
-    "file": "assets/dm-sans-400-normal-BwCSEQnW.woff",
-    "src": "_dm-sans-400-normal-BwCSEQnW.woff"
+  "_fonts-6p-9F2fh.css": {
+    "file": "assets/fonts-6p-9F2fh.css",
+    "src": "_fonts-6p-9F2fh.css"
   },
-  "_dm-sans-400-normal-CW0RaeGs.woff2": {
-    "file": "assets/dm-sans-400-normal-CW0RaeGs.woff2",
-    "src": "_dm-sans-400-normal-CW0RaeGs.woff2"
+  "_fraunces-500-normal-BTR4KCeb.woff": {
+    "file": "assets/fraunces-500-normal-BTR4KCeb.woff",
+    "src": "_fraunces-500-normal-BTR4KCeb.woff"
   },
-  "_dm-sans-500-normal-B9HHJjqV.woff2": {
-    "file": "assets/dm-sans-500-normal-B9HHJjqV.woff2",
-    "src": "_dm-sans-500-normal-B9HHJjqV.woff2"
+  "_fraunces-500-normal-DnGCNyPD.woff2": {
+    "file": "assets/fraunces-500-normal-DnGCNyPD.woff2",
+    "src": "_fraunces-500-normal-DnGCNyPD.woff2"
   },
-  "_dm-sans-500-normal-Dr3UlScf.woff": {
-    "file": "assets/dm-sans-500-normal-Dr3UlScf.woff",
-    "src": "_dm-sans-500-normal-Dr3UlScf.woff"
+  "_fraunces-600-normal-BFCDtZfi.woff2": {
+    "file": "assets/fraunces-600-normal-BFCDtZfi.woff2",
+    "src": "_fraunces-600-normal-BFCDtZfi.woff2"
   },
-  "_dm-sans-600-normal-Aqo67rzb.woff2": {
-    "file": "assets/dm-sans-600-normal-Aqo67rzb.woff2",
-    "src": "_dm-sans-600-normal-Aqo67rzb.woff2"
+  "_fraunces-600-normal-DL5QCzvS.woff": {
+    "file": "assets/fraunces-600-normal-DL5QCzvS.woff",
+    "src": "_fraunces-600-normal-DL5QCzvS.woff"
   },
-  "_dm-sans-600-normal-BmdmIIQ2.woff": {
-    "file": "assets/dm-sans-600-normal-BmdmIIQ2.woff",
-    "src": "_dm-sans-600-normal-BmdmIIQ2.woff"
+  "_fraunces-700-normal-CEOla-zY.woff2": {
+    "file": "assets/fraunces-700-normal-CEOla-zY.woff2",
+    "src": "_fraunces-700-normal-CEOla-zY.woff2"
   },
-  "_dm-sans-700-normal-CUSSCpQX.woff": {
-    "file": "assets/dm-sans-700-normal-CUSSCpQX.woff",
-    "src": "_dm-sans-700-normal-CUSSCpQX.woff"
+  "_fraunces-700-normal-DTjk5d1Q.woff": {
+    "file": "assets/fraunces-700-normal-DTjk5d1Q.woff",
+    "src": "_fraunces-700-normal-DTjk5d1Q.woff"
   },
-  "_dm-sans-700-normal-DvUfVpUG.woff2": {
-    "file": "assets/dm-sans-700-normal-DvUfVpUG.woff2",
-    "src": "_dm-sans-700-normal-DvUfVpUG.woff2"
+  "_inter-400-normal-C38fXH4l.woff2": {
+    "file": "assets/inter-400-normal-C38fXH4l.woff2",
+    "src": "_inter-400-normal-C38fXH4l.woff2"
   },
-  "_fonts-CWSFrf2w.css": {
-    "file": "assets/fonts-CWSFrf2w.css",
-    "src": "_fonts-CWSFrf2w.css"
+  "_inter-400-normal-CyCys3Eg.woff": {
+    "file": "assets/inter-400-normal-CyCys3Eg.woff",
+    "src": "_inter-400-normal-CyCys3Eg.woff"
   },
-  "_instrument-serif-400-normal-BVbkICAY.woff": {
-    "file": "assets/instrument-serif-400-normal-BVbkICAY.woff",
-    "src": "_instrument-serif-400-normal-BVbkICAY.woff"
+  "_inter-500-normal-BL9OpVg8.woff": {
+    "file": "assets/inter-500-normal-BL9OpVg8.woff",
+    "src": "_inter-500-normal-BL9OpVg8.woff"
   },
-  "_instrument-serif-400-normal-DnYpCC2O.woff2": {
-    "file": "assets/instrument-serif-400-normal-DnYpCC2O.woff2",
-    "src": "_instrument-serif-400-normal-DnYpCC2O.woff2"
+  "_inter-500-normal-Cerq10X2.woff2": {
+    "file": "assets/inter-500-normal-Cerq10X2.woff2",
+    "src": "_inter-500-normal-Cerq10X2.woff2"
+  },
+  "_inter-600-normal-CiBQ2DWP.woff": {
+    "file": "assets/inter-600-normal-CiBQ2DWP.woff",
+    "src": "_inter-600-normal-CiBQ2DWP.woff"
+  },
+  "_inter-600-normal-LgqL8muc.woff2": {
+    "file": "assets/inter-600-normal-LgqL8muc.woff2",
+    "src": "_inter-600-normal-LgqL8muc.woff2"
+  },
+  "_inter-700-normal-BLAVimhd.woff": {
+    "file": "assets/inter-700-normal-BLAVimhd.woff",
+    "src": "_inter-700-normal-BLAVimhd.woff"
+  },
+  "_inter-700-normal-Yt3aPRUw.woff2": {
+    "file": "assets/inter-700-normal-Yt3aPRUw.woff2",
+    "src": "_inter-700-normal-Yt3aPRUw.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DLTtIpIX.css",
+    "file": "assets/app-QN46AdRa.css",
     "name": "app",
     "names": [
       "app.css"
@@ -53,7 +69,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-B_LID0xP.js",
+    "file": "assets/app-DPNnPwot.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

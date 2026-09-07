@@ -9,16 +9,16 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('DM Sans', {
+                bunny('Inter', {
                     weights: [400, 500, 600, 700],
                     display: 'swap',
-                    fallbacks: ['Arial', 'sans-serif'],
+                    fallbacks: ['sans-serif'],
                     optimizedFallbacks: false,
                 }),
-                bunny('Instrument Serif', {
-                    weights: [400],
+                bunny('Fraunces', {
+                    weights: [500, 600, 700],
                     display: 'swap',
-                    fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+                    fallbacks: ['serif'],
                     optimizedFallbacks: false,
                 }),
             ],

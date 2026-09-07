@@ -5,27 +5,23 @@ namespace App\Models;
 use App\Enums\CarStatus;
 use App\Enums\DrivetrainType;
 use App\Enums\FuelType;
+use App\Enums\ListingCategory;
 use App\Enums\MileageUnit;
 use App\Enums\TransmissionType;
-use App\Enums\VehicleCondition;
 use Database\Factories\CarFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['make_id', 'car_model_id', 'body_type_id', 'car_stand_id', 'trim', 'year', 'price_amount', 'currency', 'mileage', 'mileage_unit', 'condition', 'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour', 'interior_colour', 'description', 'supplemental_specs', 'is_featured', 'video_url', 'meta_title', 'meta_description', 'canonical_override'])]
+#[Fillable(['listing_category', 'make', 'model', 'trim', 'year', 'body_type', 'price_amount', 'previous_price_amount', 'mileage', 'mileage_unit', 'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour', 'interior_colour', 'features', 'description', 'is_featured'])]
 class Car extends Model
 {
     /** @use HasFactory<CarFactory> */
     use HasFactory;
-
-    use SoftDeletes;
 
     public bool $statusTransitionInProgress = false;
 
@@ -36,68 +32,40 @@ class Car extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        $identity = implode(' ', array_filter([
-            $this->year,
-            $this->make?->name,
-            $this->carModel?->name,
-            $this->trim,
-        ]));
-
-        return trim($identity.' — '.($this->stock_number ?? 'Draft'));
-    }
-
-    public function make(): BelongsTo
-    {
-        return $this->belongsTo(Make::class);
-    }
-
-    public function carModel(): BelongsTo
-    {
-        return $this->belongsTo(CarModel::class);
-    }
-
-    public function bodyType(): BelongsTo
-    {
-        return $this->belongsTo(BodyType::class);
-    }
-
-    public function carStand(): BelongsTo
-    {
-        return $this->belongsTo(CarStand::class);
+        return trim(implode(' ', array_filter([$this->year, $this->make, $this->model, $this->trim])));
     }
 
     public function images(): HasMany
     {
-        return $this->hasMany(CarImage::class)->orderBy('display_order');
+        return $this->hasMany(CarImage::class)->orderBy('sort_order');
     }
 
-    public function primaryImage(): BelongsTo
+    public function coverImage(): HasOne
     {
-        return $this->belongsTo(CarImage::class, 'primary_image_id');
+        return $this->hasOne(CarImage::class)
+            ->where('processing_status', 'ready')
+            ->ofMany(['sort_order' => 'min', 'id' => 'min']);
     }
 
-    public function features(): BelongsToMany
+    public function leads(): HasMany
     {
-        return $this->belongsToMany(Feature::class);
+        return $this->hasMany(Lead::class);
     }
 
-    public function creator(): BelongsTo
+    public function reservations(): HasMany
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->hasMany(Reservation::class);
     }
 
-    public function updater(): BelongsTo
+    public function activeReservation(): HasOne
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->hasOne(Reservation::class)->where('status', 'active')->latestOfMany();
     }
 
     #[Scope]
-    protected function available(Builder $query): void
+    protected function activeInventory(Builder $query): void
     {
-        $query
-            ->where('status', CarStatus::Available)
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
+        $query->whereIn('status', [CarStatus::Available, CarStatus::Reserved]);
     }
 
     #[Scope]
@@ -106,23 +74,18 @@ class Car extends Model
         $query->where('is_featured', true);
     }
 
-    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
+            'listing_category' => ListingCategory::class,
             'status' => CarStatus::class,
+            'mileage_unit' => MileageUnit::class,
             'transmission' => TransmissionType::class,
             'fuel_type' => FuelType::class,
             'drivetrain' => DrivetrainType::class,
-            'condition' => VehicleCondition::class,
-            'mileage_unit' => MileageUnit::class,
-            'supplemental_specs' => 'array',
+            'features' => 'array',
             'is_featured' => 'boolean',
-            'published_at' => 'datetime',
-            'reserved_at' => 'datetime',
-            'reservation_expires_at' => 'datetime',
             'sold_at' => 'datetime',
-            'archived_at' => 'datetime',
         ];
     }
 }

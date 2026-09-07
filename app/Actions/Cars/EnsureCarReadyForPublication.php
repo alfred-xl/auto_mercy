@@ -12,7 +12,7 @@ class EnsureCarReadyForPublication
         $missing = $this->missingRequirements($car);
 
         if ($missing !== []) {
-            throw new DomainException('The car cannot be published until these fields are complete: '.implode(', ', $missing).'.');
+            throw new DomainException('The car cannot be made available until these fields are complete: '.implode(', ', $missing).'.');
         }
     }
 
@@ -25,24 +25,13 @@ class EnsureCarReadyForPublication
     public function missingRequirements(Car $car): array
     {
         $required = [
-            'stock_number' => 'Stock number',
-            'slug' => 'Slug',
-            'make_id' => 'Make',
-            'car_model_id' => 'Car model',
-            'body_type_id' => 'Body type',
-            'car_stand_id' => 'Car stand',
+            'listing_category' => 'Listing category',
+            'make' => 'Make',
+            'model' => 'Model',
             'year' => 'Year',
             'price_amount' => 'Price',
-            'mileage' => 'Mileage',
-            'mileage_unit' => 'Mileage unit',
-            'condition' => 'Condition',
-            'transmission' => 'Transmission',
-            'fuel_type' => 'Fuel type',
-            'exterior_colour' => 'Exterior colour',
             'description' => 'Description',
-            'primary_image_id' => 'Primary image',
         ];
-
         $missing = [];
 
         foreach ($required as $attribute => $label) {
@@ -51,20 +40,10 @@ class EnsureCarReadyForPublication
             }
         }
 
-        if ($car->primary_image_id === null) {
-            return $missing;
+        if (! $car->images()->where('processing_status', 'ready')->exists()) {
+            $missing[] = 'At least one ready image';
         }
 
-        $primaryImage = $car->images()->whereKey($car->primary_image_id)->first();
-
-        if ($primaryImage === null) {
-            $missing[] = 'Primary image belonging to this car';
-        } elseif ($primaryImage->processing_status !== 'ready') {
-            $missing[] = 'Processed primary image';
-        } elseif (blank($primaryImage->alt_text)) {
-            $missing[] = 'Primary image alternative text';
-        }
-
-        return array_values(array_unique($missing));
+        return $missing;
     }
 }

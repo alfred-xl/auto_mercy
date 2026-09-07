@@ -1,61 +1,61 @@
-# Phase 4 Filament vehicle and inventory management
+# Staff vehicle operations admin
 
-**Status:** Complete  
-**Completed:** 2026-08-29  
+**Status:** Implemented
+
+**Updated:** 2026-09-05
+
 **Application timezone:** `Africa/Lagos`
 
-## Delivered administration experience
+## Staff navigation and dashboard
 
-- Added a private, policy-backed Filament inventory area for cars, makes, models, body types, features, and the two approved car stands.
-- Added a Super Administrator-only Administrators resource at `/admin/administrators`; no public registration or public website pages were introduced.
-- Added dashboard widgets for lifecycle counts, inventory-quality gaps, reservation deadlines, and the ten most recently updated vehicles.
-- Added searchable/sortable car inventory with status, make, stand, and soft-delete filters, plus accessible empty states.
-- Added structured car create, edit, and view screens for identity, pricing, specifications, content, features, SEO, lifecycle facts, and gallery management.
+The Filament panel is the dealership's operational workspace. Vehicles, Leads and Financing are top-level destinations. Makes, Models, Body Types and Features are grouped under Catalogue. Company locations come from the fixed business configuration rather than a separate Car Stands resource. Administrators is visible and accessible only to active Super Administrators; policies also enforce this restriction for direct URLs.
 
-## Lifecycle controls
+Dashboard cards link to actionable queues for vehicle lifecycle states, incomplete listings, invalid primary images, new leads, overdue follow-ups, inspections in the next seven days, active financing work and individual financing stages. The recent-vehicles table links directly to edit screens.
 
-Cars are always created as Draft. Ordinary form submissions cannot write status or lifecycle timestamps. Publish, reserve, return-to-available, mark-sold, archive, and archived-to-draft controls call the existing transactional `TransitionCarStatus` action and record the acting administrator in `updated_by`.
+## Vehicle workflow
 
-Publication checks require the complete vehicle data contract and a ready primary image belonging to the car with reviewed alternative text. Reservation UI displays the centrally configured ₦500,000 amount and defaults to the centrally configured 14-day period. Automatic reservation expiry remains deliberately excluded; the dashboard only reports overdue and approaching deadlines.
+Vehicles always begin as Draft. The create/edit experience is a non-skippable five-step wizard: Vehicle, Listing, Specifications, Photos and Review. Required fields are validated before the next step becomes accessible. Make changes clear the selected model, and only active models belonging to the selected make are offered. Stock numbers, slugs and SEO metadata are generated automatically and are not exposed as staff inputs.
 
-Duplication creates a new Draft with a new stock number and slug. It copies appropriate vehicle details and feature assignments, but never copies images, primary-image state, featured state, SEO fields, lifecycle timestamps, or status.
+The listing supports stock/make/model/year/trim search; status, make, model, company location, body type and readiness filters; primary thumbnails; lifecycle badges; and explicit readiness. Staff actions include view, edit, authenticated preview, duplicate as Draft, publish, reserve, return to Available, mark Sold, archive and restore an Archived vehicle to Draft. Permanent deletion is not exposed.
 
-## Media workflow
+Status is never edited through the form. All changes use `TransitionCarStatus`, its allowed transition map and backend policy checks. Most specifications are optional. Publication requires identity, price, description, a valid configured company location and a ready primary image with alternative text. Returning to Draft or Available clears stale reservation, sale and archive timestamps as appropriate.
 
-- The authoritative gallery is `car_images`; `cars.primary_image_id` remains the sole primary-image source of truth.
-- Upload accepts only genuine JPEG, PNG, and WebP files, capped at 15 MiB and 40 megapixels.
-- Server-side inspection ignores the browser-provided extension and MIME claim. Accepted files are decoded and re-encoded through GD, receive UUID filenames, and are written to the configured `CAR_MEDIA_DISK` under a stock-specific directory.
-- Original filenames are retained only as metadata. Width, height, MIME type, encoded size, order, processing state, and creator are persisted.
-- Admins can edit alternative text/captions, set a primary image, and reorder using keyboard-accessible move controls.
-- Deleting the primary image promotes the first remaining active image. If none remains, the primary pointer becomes null and publication is blocked until a replacement is selected.
-- Soft-deleted cars retain their image records. Force-delete actions are not exposed.
+## Gallery and responsive images
 
-## Authorization and administrator safety
+Gallery uploads accept genuine JPEG, PNG and WebP files up to 15 MiB and 40 megapixels. GD decodes and re-encodes each upload, corrects supported JPEG EXIF orientation, removes source metadata, constrains oversized originals and creates thumbnail, card, medium and large WebP derivatives. AVIF derivatives are created only when the installed GD build provides `imageavif`.
 
-- Active Super Administrators manage all Phase 4 resources.
-- Active Inventory Managers manage cars, lifecycle actions, images, and features while reference resources remain view-only under the Phase 3 policies.
-- Inventory Managers cannot access the Administrators resource, including by direct URL.
-- Administrator creation and update use dedicated actions, hashed passwords, explicit role assignment, and lower-cased unique email addresses.
-- Self-deactivation is blocked. The final active Super Administrator cannot be demoted or deactivated. Administrator deletion is not exposed.
-- Reference-record deletion is available only to authorized users and only when the record has no attached cars; restrictive foreign keys remain the final integrity boundary.
+Derivative metadata includes path, width, height, format key and encoded size. Public vehicle cards and detail pages use responsive `srcset`/`sizes`, prefer AVIF when available and otherwise serve WebP derivatives. The original is only a compatibility fallback for images uploaded before derivatives existed.
 
-## Configuration
+Staff can select multiple images directly in the Photos wizard step, see previews, add per-image alternative text/captions and choose a new primary photo before saving. The saved-gallery controls continue to provide processing state/dimensions/file size, replacement, primary selection, drag ordering and keyboard-friendly move buttons. A public vehicle's only valid primary image cannot be removed. Removal quarantines files before committing the database change and restores them if the transaction fails.
 
-Phase values live in `config/automercy.php`: `NGN`, a reservation amount of `500000`, a 14-day duration, `CAR_MEDIA_DISK` (default `public`), JPEG/PNG/WebP formats, and limits of 15 MiB and 40 megapixels.
+Media settings are centralized in `config/automercy.php`, including `CAR_MEDIA_DISK`, accepted MIME types, upload limits, maximum dimensions, variant widths and compression quality.
 
-No schema migration or persistent sample inventory was required. Existing Phase 3 tables, relations, enums, observers, policies, factories, and the two approved stand records were preserved.
+## Leads
 
-## Verification evidence
+Vehicle pages have a minimal validated, CSRF-protected and rate-limited enquiry form. Submissions create Website leads in the New stage. Leads store customer contact details, interested vehicle, message/source, owner, stage, follow-up and inspection times, notes and contact timestamps.
 
-- Every Phase 4 PHP file passed syntax validation.
-- Admin routes expose the expected car, reference, stand, and administrator resources.
-- Direct rendering was tested for car list/create/view/edit, all reference list/view/edit screens, and role boundaries.
-- Domain tests cover image validation/re-encoding/storage, ordering, primary replacement, disguised uploads, safe duplication, administrator creation, self-deactivation, and final-Super-Administrator protection.
-- The full Pest suite passes against isolated MySQL `auto_mercy_testing`.
-- Laravel Pint and the production Vite/Tailwind build pass.
+The stages are New, Contacted, Qualified, Inspection Scheduled, Negotiating, Won and Lost. Staff can assign, edit notes and dates, change stage, filter by stage/owner/vehicle/follow-up state, and open Call, WhatsApp or Email hand-offs. WhatsApp conversations are never stored or read.
 
-The local PHP CLI has no `pdo_sqlite`, so database verification uses isolated MySQL. The developer database `auto_mercy` was not refreshed, reseeded, or destructively modified.
+## Financing
 
-## Manual browser handoff
+Financing requests link to a lead and optionally a vehicle. They store the vehicle price, requested amount, deposit, provider, assigned staff, follow-up date, notes and status. Stages are New Request, Documents Pending, Under Review, Approved, Declined and Completed. Tables and dashboard cards provide direct stage and overdue-work queues; no lending decision or payment automation is included.
 
-Create an administrator through `php artisan app:create-admin`, then visit `/admin`. Recommended checks are mobile/desktop navigation, keyboard use of gallery controls and dialogs, draft creation followed by gallery/alt-text review, every permitted lifecycle transition, direct-URL role boundaries, and primary-image deletion behavior.
+## Roles and daily use
+
+Active Inventory Managers can manage vehicles, galleries, leads, financing and permitted catalogue data. Active Super Administrators have those permissions and can also manage administrator accounts. Custom mutating actions authorize on the backend before changing records.
+
+A normal daily flow is:
+
+1. Open dashboard attention cards and handle overdue leads or financing work.
+2. Create a vehicle Draft and fill what is currently known.
+3. Upload and order photos, write accurate alt text and choose a primary image.
+4. Resolve every item in Publication readiness, preview, then Publish.
+5. Use only the lifecycle row/header actions as the vehicle is reserved, sold or archived.
+
+## Deployment and deferred work
+
+Run the new migrations before using the revised workflow. The location migration backfills existing assignments into fixed company-location keys. Ensure the configured media disk is publicly linked and confirm the PHP GD extension supports WebP. AVIF is optional and detected at runtime.
+
+Automated loan decisions, online payments, WhatsApp conversation storage, automatic reservation expiry, background media queues and Cloudinary video upload remain deliberately deferred. Existing images are not backfilled automatically; re-upload or replace a legacy image to generate its responsive variants.
+
+Laravel Pint and the production asset build are part of this handoff. Automated tests were intentionally not run at the user's request.

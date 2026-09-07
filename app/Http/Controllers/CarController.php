@@ -4,18 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Enums\CarStatus;
 use App\Enums\FuelType;
+use App\Enums\ListingCategory;
 use App\Enums\TransmissionType;
 use App\Http\Requests\InventoryFilterRequest;
-use App\Models\BodyType;
 use App\Models\Car;
-use App\Models\CarModel;
-use App\Models\CarStand;
-use App\Models\Make;
 use App\Queries\CarInventoryQuery;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class CarController extends Controller
 {
@@ -29,27 +26,14 @@ class CarController extends Controller
         }
 
         $hasFilterErrors = $request->session()->has('errors');
-        $cars = $hasFilterErrors
-            ? new LengthAwarePaginator([], 0, 12, 1, ['path' => route('cars.index')])
-            : $inventoryQuery->paginate($filters);
-
+        $cars = $hasFilterErrors ? new LengthAwarePaginator([], 0, 12, 1, ['path' => route('cars.index')]) : $inventoryQuery->paginate($filters);
         abort_if($cars->currentPage() > 1 && $cars->isEmpty(), 404);
-
-        $makes = Make::query()->active()->get(['id', 'name', 'slug']);
-        $models = CarModel::query()
-            ->active()
-            ->whereHas('make', fn ($query) => $query->where('is_active', true))
-            ->get(['id', 'make_id', 'name', 'slug']);
-        $bodyTypes = BodyType::query()
-            ->active()
-            ->whereHas('cars', fn ($query) => $inventoryQuery->constrainToPublicInventory($query))
-            ->get(['id', 'name', 'slug']);
-        $stands = CarStand::query()->active()->get(['id', 'name', 'slug']);
-        $activeFilters = $this->activeFilterChips($filters, $makes, $models, $bodyTypes, $stands, $inventoryQuery);
+        $activeCars = Car::query()->activeInventory();
+        $makes = (clone $activeCars)->distinct()->orderBy('make')->pluck('make');
+        $models = (clone $activeCars)->get(['make', 'model'])->unique(fn (Car $car): string => $car->make.'|'.$car->model)->sortBy('model')->values();
+        $bodyTypes = (clone $activeCars)->whereNotNull('body_type')->distinct()->orderBy('body_type')->pluck('body_type');
+        $activeFilters = $this->activeFilterChips($filters, $inventoryQuery);
         $hasFilteredQuery = $inventoryQuery->hasActiveFilters($filters) || ($filters['sort'] ?? 'latest') !== 'latest';
-        $canonical = $hasFilteredQuery
-            ? route('cars.index')
-            : route('cars.index', collect($normalizedFilters)->only('page')->all());
 
         return view('cars.index', [
             'cars' => $cars,
@@ -58,7 +42,7 @@ class CarController extends Controller
             'makes' => $makes,
             'models' => $models,
             'bodyTypes' => $bodyTypes,
-            'stands' => $stands,
+            'categories' => ListingCategory::cases(),
             'transmissions' => TransmissionType::cases(),
             'fuels' => FuelType::cases(),
             'sortOptions' => CarInventoryQuery::SORT_OPTIONS,
@@ -67,75 +51,58 @@ class CarController extends Controller
             'hasFilterErrors' => $hasFilterErrors,
             'hasPublicInventory' => $cars->isNotEmpty() || (! $hasFilterErrors && $inventoryQuery->hasPublicInventory()),
             'robots' => $hasFilteredQuery || $hasFilterErrors ? 'noindex,follow' : 'index,follow',
-            'canonical' => $canonical,
+            'canonical' => route('cars.index'),
         ]);
     }
 
     public function show(Car $car): View
     {
         abort_if($car->status === CarStatus::Archived, 410);
-        abort_if(
-            $car->status === CarStatus::Draft
-            || $car->published_at === null
-            || $car->published_at->isFuture(),
-            404,
-        );
+        abort_if($car->status === CarStatus::Draft, 404);
+        $car->load(['coverImage', 'images']);
 
-        $car->load(['make', 'carModel', 'bodyType', 'carStand', 'primaryImage', 'images', 'features']);
-
-        return view('cars.show', [
-            'car' => $car,
-            'business' => (array) config('automercy.business'),
-        ]);
+        return view('cars.show', ['car' => $car, 'business' => (array) config('automercy.business'), 'relatedCars' => $this->relatedCars($car)]);
     }
 
-    /**
-     * @param  array<string, mixed>  $filters
-     * @param  Collection<int, Make>  $makes
-     * @param  Collection<int, CarModel>  $models
-     * @param  Collection<int, BodyType>  $bodyTypes
-     * @param  Collection<int, CarStand>  $stands
-     * @return array<int, array{key: string, label: string, url: string}>
-     */
-    private function activeFilterChips(
-        array $filters,
-        Collection $makes,
-        Collection $models,
-        Collection $bodyTypes,
-        Collection $stands,
-        CarInventoryQuery $inventoryQuery,
-    ): array {
-        $chips = [];
-        $addChip = function (string $key, ?string $label, string|array|null $remove = null) use (&$chips, $filters, $inventoryQuery): void {
-            if ($label === null || $label === '') {
-                return;
+    public function preview(Car $car): View
+    {
+        Gate::authorize('view', $car);
+        $car->load(['coverImage', 'images']);
+
+        return view('cars.show', ['car' => $car, 'business' => (array) config('automercy.business'), 'isPreview' => true, 'relatedCars' => $this->relatedCars($car)]);
+    }
+
+    private function relatedCars(Car $car)
+    {
+        return Car::query()->activeInventory()->whereKeyNot($car->getKey())->with('coverImage')
+            ->orderByRaw('CASE WHEN body_type = ? THEN 0 WHEN make = ? THEN 1 ELSE 2 END', [$car->body_type ?? '', $car->make])
+            ->orderByRaw('ABS(CAST(price_amount AS SIGNED) - ?)', [(int) $car->price_amount])
+            ->latest()->limit(3)->get();
+    }
+
+    private function activeFilterChips(array $filters, CarInventoryQuery $inventoryQuery): array
+    {
+        $labels = [
+            'q' => fn ($value) => 'Search: “'.$value.'”',
+            'listing_category' => fn ($value) => ListingCategory::tryFrom($value)?->label(),
+            'make' => fn ($value) => $value,
+            'model' => fn ($value) => $value,
+            'body_type' => fn ($value) => $value,
+            'year_min' => fn ($value) => 'From '.$value,
+            'year_max' => fn ($value) => 'Up to '.$value,
+            'price_min' => fn ($value) => 'From ₦'.number_format((int) $value),
+            'price_max' => fn ($value) => 'Up to ₦'.number_format((int) $value),
+            'transmission' => fn ($value) => TransmissionType::tryFrom($value)?->label(),
+            'fuel_type' => fn ($value) => FuelType::tryFrom($value)?->label(),
+            'availability' => fn ($value) => ucfirst($value),
+        ];
+
+        return collect($filters)->filter()->map(function ($value, string $key) use ($labels, $filters, $inventoryQuery): ?array {
+            if (! isset($labels[$key])) {
+                return null;
             }
 
-            $chips[] = [
-                'key' => $key,
-                'label' => $label,
-                'url' => route('cars.index', $inventoryQuery->without($filters, $remove ?? $key)),
-            ];
-        };
-
-        $selectedMake = $makes->firstWhere('slug', $filters['make'] ?? null);
-        $selectedModel = $models->first(fn (CarModel $model): bool => $model->slug === ($filters['model'] ?? null) && $model->make_id === $selectedMake?->id);
-
-        $addChip('q', filled($filters['q'] ?? null) ? 'Search: “'.trim((string) $filters['q']).'”' : null);
-        $addChip('make', $selectedMake?->name, ['make', 'model']);
-        $addChip('model', $selectedModel?->name);
-        $addChip('body_type', $bodyTypes->firstWhere('slug', $filters['body_type'] ?? null)?->name);
-        $addChip('year_min', isset($filters['year_min']) ? 'From '.$filters['year_min'] : null);
-        $addChip('year_max', isset($filters['year_max']) ? 'Up to '.$filters['year_max'] : null);
-        $addChip('price_min', isset($filters['price_min']) ? 'From ₦'.number_format((int) $filters['price_min']) : null);
-        $addChip('price_max', isset($filters['price_max']) ? 'Up to ₦'.number_format((int) $filters['price_max']) : null);
-        $addChip('transmission', isset($filters['transmission']) ? TransmissionType::from($filters['transmission'])->label() : null);
-        $addChip('fuel_type', isset($filters['fuel_type']) ? FuelType::from($filters['fuel_type'])->label() : null);
-        $addChip('mileage_min', isset($filters['mileage_min']) ? 'From '.number_format((int) $filters['mileage_min']).' km' : null);
-        $addChip('mileage_max', isset($filters['mileage_max']) ? 'Up to '.number_format((int) $filters['mileage_max']).' km' : null);
-        $addChip('car_stand', $stands->firstWhere('slug', $filters['car_stand'] ?? null)?->name);
-        $addChip('availability', ($filters['availability'] ?? 'available') === 'reserved' ? 'Reserved' : null);
-
-        return $chips;
+            return ['key' => $key, 'label' => $labels[$key]($value), 'url' => route('cars.index', $inventoryQuery->without($filters, $key))];
+        })->filter()->values()->all();
     }
 }

@@ -2,9 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\InventoryQualityOverview;
 use App\Filament\Widgets\InventoryStatusOverview;
-use App\Filament\Widgets\RecentInventory;
+use App\Filament\Widgets\LeadOperationsOverview;
 use App\Filament\Widgets\ReservationAttentionOverview;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -31,9 +30,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('Auto Mercy')
+            ->brandLogo(asset('logo.png'))
+            ->brandLogoHeight('3.25rem')
+            ->favicon(asset('logo.png'))
             ->login()
             ->colors([
-                'primary' => Color::hex('#A60D0E'),
+                'primary' => Color::hex('#9E1B26'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -44,9 +46,8 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 InventoryStatusOverview::class,
-                InventoryQualityOverview::class,
+                LeadOperationsOverview::class,
                 ReservationAttentionOverview::class,
-                RecentInventory::class,
             ])
             ->middleware([
                 EncryptCookies::class,

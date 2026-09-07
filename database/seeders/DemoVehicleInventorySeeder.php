@@ -2,359 +2,174 @@
 
 namespace Database\Seeders;
 
-use App\Actions\CarImages\DeleteCarImage;
-use App\Actions\CarImages\ReorderCarImages;
-use App\Actions\CarImages\SetPrimaryCarImage;
-use App\Actions\CarImages\UploadCarImages;
 use App\Actions\Cars\TransitionCarStatus;
+use App\Actions\Reservations\CloseReservation;
+use App\Actions\Reservations\CreateReservation;
 use App\Enums\CarStatus;
-use App\Enums\FuelType;
+use App\Enums\ImageProcessingStatus;
+use App\Enums\LeadSource;
+use App\Enums\LeadStatus;
+use App\Enums\ListingCategory;
 use App\Enums\MileageUnit;
-use App\Enums\TransmissionType;
-use App\Enums\UserRole;
-use App\Enums\VehicleCondition;
-use App\Models\BodyType;
+use App\Enums\ReservationStatus;
 use App\Models\Car;
-use App\Models\CarImage;
-use App\Models\CarModel;
-use App\Models\CarStand;
-use App\Models\Feature;
-use App\Models\Make;
+use App\Models\Lead;
 use App\Models\User;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use LogicException;
 use RuntimeException;
-use Throwable;
 
 class DemoVehicleInventorySeeder extends Seeder
 {
-    private const ACTOR_EMAIL = 'demo-inventory@auto-mercy.invalid';
-
-    public function __construct(
-        private readonly UploadCarImages $uploadCarImages,
-        private readonly SetPrimaryCarImage $setPrimaryCarImage,
-        private readonly DeleteCarImage $deleteCarImage,
-        private readonly ReorderCarImages $reorderCarImages,
-        private readonly TransitionCarStatus $transitionCarStatus,
-    ) {}
-
     public function run(): void
     {
         if (app()->isProduction()) {
-            throw new LogicException('Demo vehicle inventory cannot be seeded in production.');
+            throw new RuntimeException('Demo inventory must not be seeded in production.');
         }
 
-        $this->call(CarStandSeeder::class);
+        User::query()->create([
+            'name' => config('automercy.admin.name') ?: 'Auto Mercy Admin',
+            'email' => config('automercy.admin.email') ?: 'admin@auto-mercy.test',
+            'password' => Hash::make(config('automercy.admin.password') ?: 'ChangeMe!12345'),
+        ]);
 
-        $actor = $this->demoActor();
-        $bodyTypes = $this->bodyTypes();
-        $features = $this->features();
-        $stands = CarStand::query()->whereIn('slug', ['iju', 'ogunnisi-road'])->get()->keyBy('slug');
+        $cars = collect($this->vehicles())->map(function (array $vehicle): Car {
+            $targetStatus = $vehicle['status'];
+            $assetSlug = $vehicle['asset_slug'];
+            unset($vehicle['status'], $vehicle['asset_slug']);
 
-        foreach ($this->vehicles() as $index => $vehicle) {
-            try {
-                $make = $this->make($vehicle['make']);
-                $model = $this->carModel($make, $vehicle['model']);
-                $publishedAt = CarbonImmutable::parse('2026-08-20 10:00:00')->subDays($index);
-                $car = $this->upsertCar(
-                    $vehicle,
-                    $make,
-                    $model,
-                    $bodyTypes[$vehicle['body_type']],
-                    $stands->get($vehicle['stand']),
-                    $actor,
-                    $publishedAt,
-                );
+            $car = Car::query()->create($vehicle);
+            $this->seedImage($car, $assetSlug);
 
-                $this->syncImage($car, $vehicle, $actor);
-                $car->features()->sync($features->only($vehicle['features'])->pluck('id')->all());
-                $car = $this->syncStatus($car->refresh(), $vehicle['status'], $actor);
-                $this->setDeterministicDates($car, $vehicle['status'], $publishedAt);
-            } catch (Throwable $exception) {
-                throw new RuntimeException(
-                    "Failed to seed demo vehicle {$vehicle['stock_number']}: {$exception->getMessage()}",
-                    0,
-                    $exception,
-                );
+            if ($targetStatus !== CarStatus::Draft) {
+                app(TransitionCarStatus::class)->execute($car, CarStatus::Available);
             }
-        }
-    }
 
-    private function demoActor(): User
-    {
-        $actor = User::query()->where('email', self::ACTOR_EMAIL)->first();
-
-        if ($actor !== null) {
-            return $actor;
-        }
-
-        $actor = new User;
-        $actor->forceFill([
-            'name' => 'Demo Inventory Seeder',
-            'email' => self::ACTOR_EMAIL,
-            'email_verified_at' => now(),
-            'password' => Hash::make(Str::random(64)),
-            'role' => UserRole::InventoryManager,
-            'is_active' => true,
-        ])->save();
-
-        return $actor;
-    }
-
-    /** @return array<string, BodyType> */
-    private function bodyTypes(): array
-    {
-        return collect(['Sedan', 'SUV'])->mapWithKeys(function (string $name): array {
-            $bodyType = BodyType::query()->firstOrCreate(
-                ['slug' => Str::slug($name)],
-                ['name' => $name, 'is_active' => true],
-            );
-
-            return [$name => $bodyType];
-        })->all();
-    }
-
-    /** @return Collection<string, Feature> */
-    private function features(): Collection
-    {
-        $definitions = [
-            'air-conditioning' => ['Air Conditioning', 'Comfort'],
-            'bluetooth' => ['Bluetooth', 'Technology'],
-            'reverse-camera' => ['Reverse Camera', 'Safety'],
-            'keyless-entry' => ['Keyless Entry', 'Comfort'],
-            'cruise-control' => ['Cruise Control', 'Comfort'],
-            'leather-seats' => ['Leather Seats', 'Comfort'],
-            'alloy-wheels' => ['Alloy Wheels', 'Exterior'],
-            'navigation' => ['Navigation', 'Technology'],
-            'parking-sensors' => ['Parking Sensors', 'Safety'],
-            'push-button-start' => ['Push-Button Start', 'Technology'],
-        ];
-
-        return collect($definitions)->mapWithKeys(function (array $definition, string $slug): array {
-            $feature = Feature::query()->firstOrCreate(
-                ['slug' => $slug],
-                ['name' => $definition[0], 'category' => $definition[1], 'is_active' => true],
-            );
-
-            return [$slug => $feature];
+            return $car->refresh()->setAttribute('seed_target_status', $targetStatus);
         });
-    }
 
-    private function make(string $name): Make
-    {
-        $normalizedName = Str::of($name)->lower()->remove(['-', ' '])->toString();
-        $make = Make::query()
-            ->whereRaw("REPLACE(REPLACE(LOWER(name), '-', ''), ' ', '') = ?", [$normalizedName])
-            ->first();
-
-        return $make ?? Make::query()->create([
-            'name' => $name,
-            'slug' => Str::slug($name),
-            'is_active' => true,
+        $generalLead = Lead::query()->create([
+            'customer_name' => 'Chinedu Okafor',
+            'phone' => '08031234567',
+            'email' => 'chinedu@example.test',
+            'message' => 'I need help choosing a reliable family SUV.',
+            'source' => LeadSource::Website,
+            'status' => LeadStatus::New,
+            'follow_up_at' => now()->addDay(),
         ]);
-    }
 
-    private function carModel(Make $make, string $name): CarModel
-    {
-        $normalizedName = Str::of($name)->lower()->remove(['-', ' '])->toString();
-        $model = CarModel::query()
-            ->whereBelongsTo($make)
-            ->whereRaw("REPLACE(REPLACE(LOWER(name), '-', ''), ' ', '') = ?", [$normalizedName])
-            ->first();
-
-        return $model ?? CarModel::query()->create([
-            'make_id' => $make->getKey(),
-            'name' => $name,
-            'slug' => Str::slug($name),
-            'is_active' => true,
-        ]);
-    }
-
-    /** @param array<string, mixed> $vehicle */
-    private function upsertCar(
-        array $vehicle,
-        Make $make,
-        CarModel $model,
-        BodyType $bodyType,
-        ?CarStand $stand,
-        User $actor,
-        CarbonImmutable $publishedAt,
-    ): Car {
-        if ($stand === null) {
-            throw new RuntimeException("The {$vehicle['stand']} demo car stand is missing.");
+        foreach ($cars->take(5) as $index => $car) {
+            Lead::query()->create([
+                'car_id' => $car->getKey(),
+                'customer_name' => ['Ada Nwosu', 'Tunde Bello', 'Ifeoma Obi', 'Kunle Adebayo', 'Amaka Eze'][$index],
+                'phone' => '0806000000'.($index + 1),
+                'email' => "buyer{$index}@example.test",
+                'message' => 'Please confirm availability and inspection options.',
+                'source' => [LeadSource::WhatsApp, LeadSource::Phone, LeadSource::WalkIn, LeadSource::SocialMedia, LeadSource::Referral][$index],
+                'status' => [LeadStatus::Contacted, LeadStatus::InspectionScheduled, LeadStatus::Negotiating, LeadStatus::Won, LeadStatus::New][$index],
+                'follow_up_at' => now()->addDays($index + 1),
+                'inspection_at' => $index === 1 ? now()->addDays(2) : null,
+                'notes' => 'Seeded customer follow-up record.',
+            ]);
         }
 
-        $attributes = [
-            'make_id' => $make->getKey(),
-            'car_model_id' => $model->getKey(),
-            'body_type_id' => $bodyType->getKey(),
-            'car_stand_id' => $stand->getKey(),
-            'trim' => $vehicle['trim'],
-            'year' => $vehicle['year'],
-            'price_amount' => $vehicle['price'],
-            'currency' => 'NGN',
-            'mileage' => $vehicle['mileage'],
-            'mileage_unit' => MileageUnit::Kilometres,
-            'condition' => VehicleCondition::ForeignUsed,
-            'transmission' => TransmissionType::Automatic,
-            'fuel_type' => FuelType::Petrol,
-            'engine' => $vehicle['engine'],
-            'exterior_colour' => $vehicle['colour'],
-            'description' => $this->description($vehicle),
-            'supplemental_specs' => ['demo_record' => true],
-            'is_featured' => false,
-            'meta_title' => "{$vehicle['year']} {$vehicle['make']} {$vehicle['model']} {$vehicle['trim']}",
-            'meta_description' => "Development preview for a {$vehicle['year']} {$vehicle['make']} {$vehicle['model']} {$vehicle['trim']} foreign-used car.",
-        ];
+        foreach ($cars as $car) {
+            $targetStatus = $car->getAttribute('seed_target_status');
 
-        $car = Car::query()->withTrashed()->where('stock_number', $vehicle['stock_number'])->first();
-
-        if ($car === null) {
-            $car = new Car;
-            $car->fill($attributes);
-            $car->forceFill(['created_by' => $actor->getKey(), 'updated_by' => $actor->getKey()])->save();
-            $car->forceFill([
-                'stock_number' => $vehicle['stock_number'],
-                'slug' => Str::slug("{$vehicle['year']} {$vehicle['make']} {$vehicle['model']} {$vehicle['trim']} {$vehicle['stock_number']}"),
-            ])->saveQuietly();
-        } else {
-            if ($car->trashed()) {
-                $car->restore();
+            if ($targetStatus === CarStatus::Reserved) {
+                $lead = Lead::query()->where('car_id', $car->getKey())->first() ?? $generalLead;
+                app(CreateReservation::class)->execute($car, $lead, (int) config('automercy.reservation.amount'), 'Deposit confirmed by staff.');
             }
 
-            $car->fill($attributes);
-            $car->forceFill(['updated_by' => $actor->getKey()])->save();
+            if ($targetStatus === CarStatus::Sold) {
+                $lead = Lead::query()->where('car_id', $car->getKey())->first() ?? $generalLead;
+                $reservation = app(CreateReservation::class)->execute($car, $lead, (int) config('automercy.reservation.amount'), 'Completed seed sale.');
+                app(CloseReservation::class)->execute($reservation, ReservationStatus::Completed);
+            }
         }
-
-        $car->refresh();
-        $this->setDeterministicDates($car, $car->status, $publishedAt);
-
-        return $car->refresh();
     }
 
-    /** @param array<string, mixed> $vehicle */
-    private function syncImage(Car $car, array $vehicle, User $actor): void
+    private function seedImage(Car $car, string $assetSlug): void
     {
-        $assetPath = database_path("seeders/assets/cars/{$vehicle['asset_slug']}/primary.webp");
+        $source = database_path("seeders/assets/cars/{$assetSlug}/primary.webp");
 
-        if (! is_file($assetPath)) {
-            throw new RuntimeException("The primary image asset does not exist at {$assetPath}.");
+        if (! is_file($source)) {
+            throw new RuntimeException("Missing local seed image: {$source}");
         }
 
-        $seedImages = $car->images()->where('original_filename', 'primary.webp')->get();
-        $primaryImage = $seedImages->first(fn (CarImage $image): bool => Storage::disk($image->disk)->exists($image->path));
+        $contents = file_get_contents($source);
 
-        foreach ($seedImages as $seedImage) {
-            if ($primaryImage?->is($seedImage)) {
-                continue;
-            }
-
-            $this->deleteCarImage->execute($car, $seedImage, $actor);
+        if ($contents === false) {
+            throw new RuntimeException("Unable to read local seed image: {$source}");
         }
 
-        if ($primaryImage === null) {
-            $primaryImage = $this->uploadCarImages->execute($car, [
-                new UploadedFile($assetPath, 'primary.webp', 'image/webp', null, true),
-            ], $actor)->firstOrFail();
+        $directory = 'cars/'.strtolower($car->stock_number);
+        $originalPath = "{$directory}/seed.webp";
+        Storage::disk((string) config('automercy.media.disk'))->put($originalPath, $contents);
+        $dimensions = getimagesize($source);
+        $width = $dimensions[0] ?? 1200;
+        $height = $dimensions[1] ?? 800;
+        $derivatives = [];
+
+        foreach (array_keys((array) config('automercy.media.variants')) as $variant) {
+            $path = "{$directory}/derivatives/seed-{$variant}.webp";
+            Storage::disk((string) config('automercy.media.disk'))->put($path, $contents);
+            $derivatives[$variant]['webp'] = compact('path', 'width', 'height') + ['file_size_bytes' => strlen($contents)];
         }
 
-        $primaryImage->update([
-            'alt_text' => "{$vehicle['year']} {$vehicle['colour']} {$vehicle['make']} {$vehicle['model']} {$vehicle['trim']} demo vehicle",
+        $car->images()->create([
+            'path' => $originalPath,
+            'derivatives' => $derivatives,
+            'alt_text' => $car->display_name,
+            'sort_order' => 0,
+            'processing_status' => ImageProcessingStatus::Ready,
         ]);
-        $this->setPrimaryCarImage->execute($car, $primaryImage, $actor);
-
-        $orderedIds = $car->images()->get()
-            ->sortByDesc(fn (CarImage $image): bool => $image->is($primaryImage))
-            ->pluck('id')
-            ->map(fn (int $id): int => $id)
-            ->values()
-            ->all();
-        $this->reorderCarImages->execute($car, $orderedIds);
-    }
-
-    private function syncStatus(Car $car, CarStatus $target, User $actor): Car
-    {
-        if ($car->status === $target) {
-            return $car;
-        }
-
-        if ($car->status === CarStatus::Reserved && in_array($target, [CarStatus::Available, CarStatus::Sold], true)) {
-            return $this->transitionCarStatus->execute($car, $target, null, $actor);
-        }
-
-        if ($car->status === CarStatus::Available && in_array($target, [CarStatus::Reserved, CarStatus::Sold], true)) {
-            return $this->transitionCarStatus->execute($car, $target, now()->addDays(14), $actor);
-        }
-
-        if ($car->status !== CarStatus::Draft) {
-            if ($car->status !== CarStatus::Archived) {
-                $car = $this->transitionCarStatus->execute($car, CarStatus::Archived, null, $actor);
-            }
-
-            $car = $this->transitionCarStatus->execute($car, CarStatus::Draft, null, $actor);
-        }
-
-        $car = $this->transitionCarStatus->execute($car, CarStatus::Available, null, $actor);
-
-        return $target === CarStatus::Available
-            ? $car
-            : $this->transitionCarStatus->execute($car, $target, now()->addDays(14), $actor);
-    }
-
-    private function setDeterministicDates(Car $car, CarStatus $status, CarbonImmutable $publishedAt): void
-    {
-        $timestamps = $car->timestamps;
-        $car->timestamps = false;
-        $car->forceFill([
-            'published_at' => $publishedAt,
-            'reserved_at' => $status === CarStatus::Reserved ? $publishedAt->addDay() : null,
-            'sold_at' => $status === CarStatus::Sold ? $publishedAt->addDay() : null,
-            'created_at' => $publishedAt->subDays(2),
-            'updated_at' => $publishedAt,
-        ])->saveQuietly();
-        $car->timestamps = $timestamps;
-    }
-
-    /** @param array<string, mixed> $vehicle */
-    private function description(array $vehicle): string
-    {
-        return "This foreign-used {$vehicle['year']} {$vehicle['make']} {$vehicle['model']} {$vehicle['trim']} is presented in {$vehicle['colour']} with an automatic transmission, petrol fuel type, {$vehicle['engine']} engine specification, and ".number_format($vehicle['mileage'])." km recorded for this preview.\n\nDemo vehicle record created for development and interface preview purposes.";
     }
 
     /** @return list<array<string, mixed>> */
     private function vehicles(): array
     {
-        $standardFeatures = ['air-conditioning', 'bluetooth', 'reverse-camera', 'keyless-entry', 'cruise-control', 'alloy-wheels'];
-        $premiumFeatures = [...$standardFeatures, 'leather-seats', 'navigation', 'parking-sensors', 'push-button-start'];
-
         return [
-            $this->vehicle('DEMO-CAMRY-2018-01', 2018, 'Toyota', 'Camry', 'XLE', 'Sedan', 'Black', 78_500, '2.5L', 30_500_000, CarStatus::Available, 'iju', '2018-toyota-camry-xle', $premiumFeatures),
-            $this->vehicle('DEMO-COROLLA-2017-01', 2017, 'Toyota', 'Corolla', 'LE', 'Sedan', 'White', 91_200, '1.8L', 18_500_000, CarStatus::Available, 'ogunnisi-road', '2017-toyota-corolla-le', $standardFeatures),
-            $this->vehicle('DEMO-RAV4-2020-01', 2020, 'Toyota', 'RAV4', 'XLE', 'SUV', 'Silver', 54_600, '2.5L', 38_000_000, CarStatus::Available, 'iju', '2020-toyota-rav4-xle', $premiumFeatures),
-            $this->vehicle('DEMO-RX350-2018-01', 2018, 'Lexus', 'RX 350', 'Premium', 'SUV', 'Pearl White', 70_300, '3.5L', 48_000_000, CarStatus::Available, 'ogunnisi-road', '2018-lexus-rx-350-premium', $premiumFeatures),
-            $this->vehicle('DEMO-ES350-2017-01', 2017, 'Lexus', 'ES 350', 'Luxury', 'Sedan', 'Black', 82_100, '3.5L', 32_000_000, CarStatus::Available, 'iju', '2017-lexus-es-350-luxury', $premiumFeatures),
-            $this->vehicle('DEMO-C300-2016-01', 2016, 'Mercedes-Benz', 'C300', '4MATIC', 'Sedan', 'Grey', 88_700, '2.0L', 31_500_000, CarStatus::Available, 'ogunnisi-road', '2016-mercedes-benz-c300-4matic', $premiumFeatures),
-            $this->vehicle('DEMO-ACCORD-2019-01', 2019, 'Honda', 'Accord', 'Sport', 'Sedan', 'Red', 63_400, '1.5L Turbo', 30_000_000, CarStatus::Available, 'iju', '2019-honda-accord-sport', $standardFeatures),
-            $this->vehicle('DEMO-CRV-2018-01', 2018, 'Honda', 'CR-V', 'EX-L', 'SUV', 'Blue', 75_900, '1.5L Turbo', 34_000_000, CarStatus::Available, 'ogunnisi-road', '2018-honda-cr-v-ex-l', $premiumFeatures),
-            $this->vehicle('DEMO-HIGHLANDER-2019-01', 2019, 'Toyota', 'Highlander', 'XLE', 'SUV', 'Black', 68_200, '3.5L', 52_000_000, CarStatus::Available, 'iju', '2019-toyota-highlander-xle', $premiumFeatures),
-            $this->vehicle('DEMO-EXPLORER-2017-01', 2017, 'Ford', 'Explorer', 'XLT', 'SUV', 'White', 96_500, '3.5L', 34_000_000, CarStatus::Available, 'ogunnisi-road', '2017-ford-explorer-xlt', $standardFeatures),
-            $this->vehicle('DEMO-SONATA-2020-01', 2020, 'Hyundai', 'Sonata', 'SEL', 'Sedan', 'Silver', 58_300, '2.5L', 25_500_000, CarStatus::Reserved, 'iju', '2020-hyundai-sonata-sel', $standardFeatures),
-            $this->vehicle('DEMO-ROGUE-2018-01', 2018, 'Nissan', 'Rogue', 'SV', 'SUV', 'Grey', 84_600, '2.5L', 23_500_000, CarStatus::Sold, 'ogunnisi-road', '2018-nissan-rogue-sv', $standardFeatures),
+            $this->vehicle(ListingCategory::ForeignUsed, 'Toyota', 'Camry', 'XLE', 2018, 'Sedan', 30_500_000, 78_500, CarStatus::Available, '2018-toyota-camry-xle'),
+            $this->vehicle(ListingCategory::BrandNew, 'Toyota', 'Corolla', 'LE', 2025, 'Sedan', 42_000_000, 20, CarStatus::Available, '2017-toyota-corolla-le'),
+            $this->vehicle(ListingCategory::PreOrder, 'Toyota', 'RAV4', 'XLE', 2022, 'SUV', 45_000_000, 31_000, CarStatus::Available, '2020-toyota-rav4-xle'),
+            $this->vehicle(ListingCategory::ForeignUsed, 'Lexus', 'RX 350', 'Premium', 2018, 'SUV', 48_000_000, 70_300, CarStatus::Available, '2018-lexus-rx-350-premium'),
+            $this->vehicle(ListingCategory::BrandNew, 'Lexus', 'ES 350', 'Luxury', 2025, 'Sedan', 82_000_000, 15, CarStatus::Reserved, '2017-lexus-es-350-luxury'),
+            $this->vehicle(ListingCategory::PreOrder, 'Mercedes-Benz', 'C300', '4MATIC', 2021, 'Sedan', 55_500_000, 39_000, CarStatus::Available, '2016-mercedes-benz-c300-4matic'),
+            $this->vehicle(ListingCategory::ForeignUsed, 'Honda', 'Accord', 'Sport', 2019, 'Sedan', 30_000_000, 63_400, CarStatus::Reserved, '2019-honda-accord-sport'),
+            $this->vehicle(ListingCategory::BrandNew, 'Honda', 'CR-V', 'EX-L', 2025, 'SUV', 68_000_000, 12, CarStatus::Available, '2018-honda-cr-v-ex-l'),
+            $this->vehicle(ListingCategory::PreOrder, 'Toyota', 'Highlander', 'XLE', 2020, 'SUV', 58_000_000, 55_200, CarStatus::Available, '2019-toyota-highlander-xle'),
+            $this->vehicle(ListingCategory::ForeignUsed, 'Ford', 'Explorer', 'XLT', 2017, 'SUV', 34_000_000, 96_500, CarStatus::Sold, '2017-ford-explorer-xlt'),
+            $this->vehicle(ListingCategory::BrandNew, 'Hyundai', 'Sonata', 'SEL', 2025, 'Sedan', 46_500_000, 8, CarStatus::Draft, '2020-hyundai-sonata-sel'),
+            $this->vehicle(ListingCategory::PreOrder, 'Nissan', 'Rogue', 'SV', 2022, 'SUV', 36_500_000, 28_600, CarStatus::Available, '2018-nissan-rogue-sv'),
         ];
     }
 
-    /** @param list<string> $features */
-    private function vehicle(string $stockNumber, int $year, string $make, string $model, string $trim, string $bodyType, string $colour, int $mileage, string $engine, int $price, CarStatus $status, string $stand, string $assetSlug, array $features): array
+    /** @return array<string, mixed> */
+    private function vehicle(ListingCategory $category, string $make, string $model, string $trim, int $year, string $bodyType, int $price, int $mileage, CarStatus $status, string $assetSlug): array
     {
-        return compact('stockNumber', 'year', 'make', 'model', 'trim', 'bodyType', 'colour', 'mileage', 'engine', 'price', 'status', 'stand', 'assetSlug', 'features') + [
-            'stock_number' => $stockNumber,
+        return [
+            'listing_category' => $category,
+            'make' => $make,
+            'model' => $model,
+            'trim' => $trim,
+            'year' => $year,
             'body_type' => $bodyType,
+            'price_amount' => $price,
+            'previous_price_amount' => $status === CarStatus::Available ? $price + 2_000_000 : null,
+            'mileage' => $mileage,
+            'mileage_unit' => MileageUnit::Kilometres,
+            'transmission' => 'automatic',
+            'fuel_type' => 'petrol',
+            'drivetrain' => 'fwd',
+            'engine' => '2.5L 4-cylinder',
+            'exterior_colour' => 'Black',
+            'interior_colour' => 'Black leather',
+            'features' => ['Air conditioning', 'Bluetooth', 'Reverse camera', 'Keyless entry'],
+            'description' => "A carefully selected {$year} {$make} {$model} {$trim}, inspected and prepared for a straightforward Auto Mercy buying experience.",
+            'is_featured' => $status === CarStatus::Available,
+            'status' => $status,
             'asset_slug' => $assetSlug,
         ];
     }

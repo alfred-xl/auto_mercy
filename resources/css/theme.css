@@ -1,63 +1,76 @@
 @theme static {
     /* Brand and action colours */
-    --color-mercy-red: #a60d0e;
-    --color-mercy-red-dark: #7d090a;
-    --color-carbon: #111010;
-    --color-graphite: #1b1b1d;
-    --color-pure-white: #fefefe;
-    --color-pearl: #f5f5f3;
-    --color-metallic: #d8dadd;
-    --color-slate: #676b72;
-    --color-available: #18794e;
+    --color-mercy-red: #9e1b26;
+    --color-mercy-red-dark: #7d151e;
+    --color-carbon: #161513;
+    --color-graphite: #24211f;
+    --color-pure-white: #ffffff;
+    --color-pearl: #faf8f6;
+    --color-metallic: #ded8d2;
+    --color-slate: #6b6b6b;
+    --color-available: #3f5d45;
+    --color-gold: #b6863c;
     --color-whatsapp: #25d366;
 
     /* Brand type families */
-    --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-    --font-sans: 'DM Sans', Inter, Arial, sans-serif;
+    --font-display: 'Fraunces', serif;
+    --font-sans: 'Inter', sans-serif;
 
     /* Responsive brand type scale */
-    --text-display: clamp(3rem, 7vw, 5.5rem);
-    --text-display--line-height: 0.95;
-    --text-display--letter-spacing: -0.035em;
-    --text-display--font-weight: 400;
-    --text-h1: clamp(2.5rem, 5vw, 4.5rem);
-    --text-h1--line-height: 1;
-    --text-h1--letter-spacing: -0.03em;
-    --text-h1--font-weight: 400;
-    --text-h2: clamp(2.125rem, 4vw, 3.5rem);
-    --text-h2--line-height: 1.05;
-    --text-h2--letter-spacing: -0.025em;
-    --text-h2--font-weight: 400;
-    --text-h3: clamp(1.75rem, 3vw, 2.5rem);
-    --text-h3--line-height: 1.1;
-    --text-h3--letter-spacing: -0.02em;
-    --text-h3--font-weight: 400;
-    --text-h4: clamp(1.25rem, 2vw, 1.5rem);
+    --text-display: clamp(3rem, 5vw, 3.5rem);
+    --text-display--line-height: 1;
+    --text-display--letter-spacing: -0.02em;
+    --text-display--font-weight: 600;
+    --text-hero: clamp(3rem, 5vw, 3.5rem);
+    --text-hero--line-height: 1;
+    --text-hero--letter-spacing: -0.02em;
+    --text-hero--font-weight: 600;
+    --text-page-title: clamp(2.25rem, 4vw, 2.5rem);
+    --text-page-title--line-height: 1.08;
+    --text-page-title--letter-spacing: -0.02em;
+    --text-page-title--font-weight: 600;
+    --text-section-title: clamp(2rem, 3vw, 2.25rem);
+    --text-section-title--line-height: 1.1;
+    --text-section-title--letter-spacing: -0.015em;
+    --text-section-title--font-weight: 600;
+    --text-h1: clamp(2rem, 4vw, 2.375rem);
+    --text-h1--line-height: 1.05;
+    --text-h1--letter-spacing: -0.02em;
+    --text-h1--font-weight: 600;
+    --text-h2: clamp(1.75rem, 3vw, 2rem);
+    --text-h2--line-height: 1.1;
+    --text-h2--letter-spacing: -0.015em;
+    --text-h2--font-weight: 600;
+    --text-h3: clamp(1.125rem, 2vw, 1.25rem);
+    --text-h3--line-height: 1.2;
+    --text-h3--letter-spacing: -0.01em;
+    --text-h3--font-weight: 600;
+    --text-h4: clamp(1.125rem, 2vw, 1.25rem);
     --text-h4--line-height: 1.2;
     --text-h4--letter-spacing: -0.01em;
     --text-h4--font-weight: 600;
-    --text-body-lg: 1.125rem;
-    --text-body-lg--line-height: 1.7;
-    --text-body: 1rem;
+    --text-body-lg: 1rem;
+    --text-body-lg--line-height: 1.65;
+    --text-body: 0.9375rem;
     --text-body--line-height: 1.65;
     --text-body-sm: 0.875rem;
     --text-body-sm--line-height: 1.55;
-    --text-label: 0.875rem;
+    --text-label: 0.75rem;
     --text-label--line-height: 1.35;
     --text-label--letter-spacing: 0.08em;
     --text-label--font-weight: 600;
-    --text-button: 1rem;
+    --text-button: 0.875rem;
     --text-button--line-height: 1.25;
     --text-button--letter-spacing: 0.01em;
     --text-button--font-weight: 600;
-    --text-vehicle-price: clamp(1.5rem, 3vw, 2.25rem);
+    --text-vehicle-price: clamp(1.625rem, 3vw, 2rem);
     --text-vehicle-price--line-height: 1.1;
     --text-vehicle-price--letter-spacing: -0.02em;
-    --text-vehicle-price--font-weight: 700;
-    --text-vehicle-name: clamp(1.125rem, 2vw, 1.375rem);
+    --text-vehicle-price--font-weight: 600;
+    --text-vehicle-name: clamp(1.125rem, 2vw, 1.25rem);
     --text-vehicle-name--line-height: 1.25;
     --text-vehicle-name--font-weight: 600;
-    --text-vehicle-meta: 0.875rem;
+    --text-vehicle-meta: 0.8125rem;
     --text-vehicle-meta--line-height: 1.5;
     --text-vehicle-meta--font-weight: 500;
 
@@ -80,8 +93,8 @@
     --container-wide: 90rem;
     --container-reading: 42rem;
     --spacing-gutter: clamp(1rem, 4vw, 2rem);
-    --spacing-section: clamp(4rem, 8vw, 7.5rem);
-    --spacing-section-compact: clamp(2.5rem, 5vw, 4rem);
+    --spacing-section: clamp(5rem, 8vw, 6.25rem);
+    --spacing-section-compact: clamp(4rem, 6vw, 5rem);
     --spacing-grid: clamp(1rem, 2vw, 1.5rem);
     --spacing-touch: 2.75rem;
 
@@ -89,10 +102,10 @@
     --radius-badge: 0.25rem;
     --radius-button: 0.5rem;
     --radius-input: 0.5rem;
-    --radius-card: 0.75rem;
-    --shadow-card: 0 0.5rem 1.5rem rgb(17 16 16 / 0.08);
-    --shadow-card-hover: 0 0.875rem 2rem rgb(17 16 16 / 0.12);
-    --shadow-overlay: 0 1.25rem 3rem rgb(17 16 16 / 0.18);
+    --radius-card: 1rem;
+    --shadow-card: 0 0.5rem 1.5rem rgb(22 21 19 / 0.07);
+    --shadow-card-hover: 0 1rem 2.5rem rgb(22 21 19 / 0.13);
+    --shadow-overlay: 0 1.25rem 3rem rgb(22 21 19 / 0.18);
 
     /* Image proportions */
     --aspect-vehicle-card: 4 / 3;
@@ -123,7 +136,7 @@
     --color-status-available: var(--color-available);
     --color-status-reserved: var(--color-mercy-red-dark);
     --color-status-sold: var(--color-slate);
-    --color-status-newly-added: var(--color-carbon);
+    --color-status-newly-added: var(--color-gold);
     --color-status-featured: var(--color-mercy-red);
 }
 
