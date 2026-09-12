@@ -15,7 +15,7 @@ class DuplicateCarAsDraft
         'listing_category', 'make', 'model', 'trim', 'year', 'body_type',
         'price_amount', 'previous_price_amount', 'mileage', 'mileage_unit',
         'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour',
-        'interior_colour', 'features', 'description',
+        'interior_colour', 'description',
     ];
 
     public function execute(Car $source, User $actor): Car
@@ -29,6 +29,7 @@ class DuplicateCarAsDraft
                 'status' => CarStatus::Draft,
                 'is_featured' => false,
             ])->save();
+            $duplicate->features()->sync($source->features()->pluck('features.id'));
 
             return $duplicate->refresh();
         });

@@ -14,10 +14,11 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['listing_category', 'make', 'model', 'trim', 'year', 'body_type', 'price_amount', 'previous_price_amount', 'mileage', 'mileage_unit', 'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour', 'interior_colour', 'features', 'description', 'is_featured'])]
+#[Fillable(['listing_category', 'make', 'model', 'trim', 'year', 'body_type', 'price_amount', 'previous_price_amount', 'mileage', 'mileage_unit', 'transmission', 'fuel_type', 'drivetrain', 'engine', 'exterior_colour', 'interior_colour', 'description', 'is_featured'])]
 class Car extends Model
 {
     /** @use HasFactory<CarFactory> */
@@ -45,6 +46,11 @@ class Car extends Model
         return $this->hasOne(CarImage::class)
             ->where('processing_status', 'ready')
             ->ofMany(['sort_order' => 'min', 'id' => 'min']);
+    }
+
+    public function features(): BelongsToMany
+    {
+        return $this->belongsToMany(Feature::class)->orderBy('name');
     }
 
     public function leads(): HasMany
@@ -83,7 +89,6 @@ class Car extends Model
             'transmission' => TransmissionType::class,
             'fuel_type' => FuelType::class,
             'drivetrain' => DrivetrainType::class,
-            'features' => 'array',
             'is_featured' => 'boolean',
             'sold_at' => 'datetime',
         ];

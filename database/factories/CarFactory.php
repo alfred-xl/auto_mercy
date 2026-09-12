@@ -27,7 +27,6 @@ class CarFactory extends Factory
             'mileage_unit' => MileageUnit::Kilometres,
             'transmission' => TransmissionType::Automatic,
             'fuel_type' => FuelType::Petrol,
-            'features' => ['Air conditioning', 'Bluetooth', 'Reverse camera'],
             'description' => fake()->paragraphs(2, true),
             'status' => CarStatus::Draft,
             'is_featured' => false,

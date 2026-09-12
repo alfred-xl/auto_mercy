@@ -13,6 +13,7 @@ use App\Enums\ListingCategory;
 use App\Enums\MileageUnit;
 use App\Enums\ReservationStatus;
 use App\Models\Car;
+use App\Models\Feature;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -34,12 +35,22 @@ class DemoVehicleInventorySeeder extends Seeder
             'password' => Hash::make(config('automercy.admin.password') ?: 'ChangeMe!12345'),
         ]);
 
-        $cars = collect($this->vehicles())->map(function (array $vehicle): Car {
+        $defaultFeatureIds = Feature::query()
+            ->whereIn('normalized_name', collect([
+                'Cold/Chilling AC',
+                'Bluetooth Connectivity',
+                'Reverse Camera',
+                'Keyless Entry',
+            ])->map(Feature::normalizeName(...)))
+            ->pluck('id');
+
+        $cars = collect($this->vehicles())->map(function (array $vehicle) use ($defaultFeatureIds): Car {
             $targetStatus = $vehicle['status'];
             $assetSlug = $vehicle['asset_slug'];
             unset($vehicle['status'], $vehicle['asset_slug']);
 
             $car = Car::query()->create($vehicle);
+            $car->features()->sync($defaultFeatureIds);
             $this->seedImage($car, $assetSlug);
 
             if ($targetStatus !== CarStatus::Draft) {
@@ -166,7 +177,6 @@ class DemoVehicleInventorySeeder extends Seeder
             'engine' => '2.5L 4-cylinder',
             'exterior_colour' => 'Black',
             'interior_colour' => 'Black leather',
-            'features' => ['Air conditioning', 'Bluetooth', 'Reverse camera', 'Keyless entry'],
             'description' => "A carefully selected {$year} {$make} {$model} {$trim}, inspected and prepared for a straightforward Auto Mercy buying experience.",
             'is_featured' => $status === CarStatus::Available,
             'status' => $status,

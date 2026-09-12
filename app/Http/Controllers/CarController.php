@@ -59,7 +59,7 @@ class CarController extends Controller
     {
         abort_if($car->status === CarStatus::Archived, 410);
         abort_if($car->status === CarStatus::Draft, 404);
-        $car->load(['coverImage', 'images']);
+        $car->load(['coverImage', 'images', 'features']);
 
         return view('cars.show', ['car' => $car, 'business' => (array) config('automercy.business'), 'relatedCars' => $this->relatedCars($car)]);
     }
@@ -67,7 +67,7 @@ class CarController extends Controller
     public function preview(Car $car): View
     {
         Gate::authorize('view', $car);
-        $car->load(['coverImage', 'images']);
+        $car->load(['coverImage', 'images', 'features']);
 
         return view('cars.show', ['car' => $car, 'business' => (array) config('automercy.business'), 'isPreview' => true, 'relatedCars' => $this->relatedCars($car)]);
     }

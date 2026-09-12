@@ -57,6 +57,5 @@ return [
             'large' => 1800,
         ],
         'webp_quality' => 82,
-        'avif_quality' => 68,
     ],
 ];

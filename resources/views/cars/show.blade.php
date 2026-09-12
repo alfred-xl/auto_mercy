@@ -152,7 +152,21 @@
             </section>
             <section class="mt-16 grid gap-10 border-t border-border-default pt-10 lg:grid-cols-[1.2fr_0.8fr]">
                 <div><p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Vehicle overview</p><h2 class="mt-3 font-display text-h2">About this {{ $car->make }} {{ $car->model }}</h2><div class="mt-5 whitespace-pre-line leading-7 text-text-secondary">{{ trim(strip_tags($car->description)) }}</div></div>
-                <div><h2 class="text-xl font-semibold">Features and equipment</h2>@if (filled($car->features))<ul class="mt-5 grid grid-cols-2 gap-3 text-sm">@foreach ($car->features as $feature)<li>— {{ $feature }}</li>@endforeach</ul>@else<p class="mt-4 text-sm text-text-secondary">Ask our team for the complete equipment list.</p>@endif</div>
+                <div>
+                    <h2 class="text-xl font-semibold">Features and equipment</h2>
+                    @if ($car->features->isNotEmpty())
+                        <ul class="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                            @foreach ($car->features as $feature)
+                                <li class="flex items-start gap-2">
+                                    <x-heroicon-o-check-circle class="mt-0.5 h-5 w-5 shrink-0 text-available" aria-hidden="true" />
+                                    <span>{{ $feature->name }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="mt-4 text-sm text-text-secondary">Ask our team for the complete equipment list.</p>
+                    @endif
+                </div>
             </section>
         </div>
     </main>

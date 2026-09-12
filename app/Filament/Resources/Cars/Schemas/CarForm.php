@@ -10,6 +10,7 @@ use App\Enums\ListingCategory;
 use App\Enums\MileageUnit;
 use App\Enums\TransmissionType;
 use App\Models\Car;
+use App\Models\Feature;
 use App\Models\User;
 use DomainException;
 use Filament\Actions\Action;
@@ -17,7 +18,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -26,6 +26,8 @@ use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Throwable;
 
 class CarForm
@@ -74,7 +76,28 @@ class CarForm
             ]),
             Step::make('Features')->schema([
                 Section::make('Vehicle features')->schema([
-                    TagsInput::make('features')->placeholder('Add a feature')->helperText('Press Enter after each feature.'),
+                    Select::make('features')
+                        ->label('Features')
+                        ->multiple()
+                        ->relationship('features', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                        ->searchable(['name'])
+                        ->preload()
+                        ->placeholder('Search and select vehicle features')
+                        ->helperText('Select existing features or create a new reusable feature.')
+                        ->createOptionForm([
+                            TextInput::make('name')
+                                ->required()
+                                ->maxLength(120),
+                        ])
+                        ->createOptionUsing(function (array $data): int {
+                            $name = Str::squish($data['name']);
+                            $feature = Feature::query()->firstOrCreate(
+                                ['normalized_name' => Feature::normalizeName($name)],
+                                ['name' => $name],
+                            );
+
+                            return $feature->getKey();
+                        }),
                 ]),
             ]),
             Step::make('Description')->schema([
@@ -97,9 +120,14 @@ class CarForm
                             ->multiple()
                             ->appendFiles()
                             ->reorderable()
+                            ->maxParallelUploads(2)
                             ->panelLayout('grid')
                             ->imagePreviewHeight('128')
                             ->image()
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth('2400')
+                            ->imageResizeTargetHeight('1800')
+                            ->imageResizeUpscale(false)
                             ->storeFiles(false)
                             ->previewable()
                             ->openable()

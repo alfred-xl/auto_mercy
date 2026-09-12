@@ -63,13 +63,6 @@ class UploadCarImages
                     $this->store($disk, $webpPath, $webpContents, $storedPaths);
                     $derivatives[$variant]['webp'] = ['path' => $webpPath, 'width' => $width, 'height' => $height, 'file_size_bytes' => strlen($webpContents)];
 
-                    if (function_exists('imageavif')) {
-                        $avifPath = "{$directory}/derivatives/{$identifier}-{$variant}.avif";
-                        $avifContents = $this->encode($variantImage, 'image/avif');
-                        $this->store($disk, $avifPath, $avifContents, $storedPaths);
-                        $derivatives[$variant]['avif'] = ['path' => $avifPath, 'width' => $width, 'height' => $height, 'file_size_bytes' => strlen($avifContents)];
-                    }
-
                     if ($variantImage !== $image) {
                         imagedestroy($variantImage);
                     }
@@ -196,7 +189,6 @@ class UploadCarImages
             'image/jpeg' => imagejpeg($image, null, 88),
             'image/png' => imagepng($image, null, 6),
             'image/webp' => imagewebp($image, null, (int) config('automercy.media.webp_quality', 82)),
-            'image/avif' => imageavif($image, null, (int) config('automercy.media.avif_quality', 68)),
             default => false,
         };
         $contents = ob_get_clean();

@@ -80,6 +80,6 @@ class CarResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['coverImage', 'images']);
+        return parent::getEloquentQuery()->with(['coverImage', 'images', 'features']);
     }
 }

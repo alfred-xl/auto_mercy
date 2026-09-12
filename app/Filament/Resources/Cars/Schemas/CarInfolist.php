@@ -62,7 +62,7 @@ class CarInfolist
                     TextEntry::make('engine')->placeholder('—'),
                     TextEntry::make('exterior_colour')->label('Exterior colour')->placeholder('—'),
                     TextEntry::make('interior_colour')->label('Interior colour')->placeholder('—'),
-                    TextEntry::make('features')->badge()->placeholder('No features added')->columnSpanFull(),
+                    TextEntry::make('features.name')->label('Features')->badge()->placeholder('No features added')->columnSpanFull(),
                 ])
                 ->columnSpanFull(),
             Section::make('Description')
