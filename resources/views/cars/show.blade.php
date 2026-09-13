@@ -24,6 +24,7 @@
                 <div
                     class="min-w-0"
                     data-vehicle-gallery
+                    data-reveal="left"
                     data-gallery-initial-index="{{ $initialGalleryIndex }}"
                     data-gallery-autoplay-delay="4500"
                 >
@@ -140,7 +141,7 @@
 
                     <div class="mt-5 rounded-card border border-border-default border-l-2 border-l-gold bg-pure-white px-5 py-4 text-sm text-text-secondary"><strong class="font-medium text-carbon">Viewing note:</strong> Call before visiting so our team can confirm availability and arrange an inspection.</div>
                 </div>
-                <div class="min-w-0">
+                <div class="min-w-0" data-reveal="right">
                     <div class="flex flex-wrap gap-2"><span class="rounded-full bg-mercy-red px-4 py-2 text-xs font-medium text-pure-white">{{ $car->listing_category->label() }}</span></div>
                     <h1 class="mt-6 font-display text-[clamp(2.25rem,4vw,3rem)] font-medium leading-[1.05] tracking-display text-carbon">{{ $vehicleName }}</h1>
                     <div class="mt-7 flex flex-wrap items-baseline gap-3"><p class="font-display text-[clamp(2rem,4vw,2.75rem)] font-medium leading-none tracking-display text-mercy-red">&#8358;{{ number_format($car->price_amount) }}</p>@if ($hasDiscount)<p class="font-display text-base text-text-secondary line-through">&#8358;{{ number_format($car->previous_price_amount) }}</p>@endif</div>
@@ -154,12 +155,12 @@
 
     <section class="bg-pure-white py-section-compact" aria-label="Vehicle information">
         <div class="mx-auto grid max-w-site gap-12 px-gutter lg:grid-cols-[1.1fr_0.9fr] lg:gap-24">
-            <div>
+            <div data-reveal="left">
                 <p class="text-sm font-semibold uppercase tracking-label text-text-secondary">Vehicle overview</p>
                 <h2 class="mt-5 font-display text-h1 font-medium">About this {{ $car->make }} {{ $car->model }}</h2>
                 <div class="mt-6 whitespace-pre-line text-base leading-8 text-text-secondary sm:text-lg">{{ trim(strip_tags($car->description)) }}</div>
             </div>
-            <div>
+            <div data-reveal="right">
                 <p class="text-sm font-semibold uppercase tracking-label text-text-secondary">Features and equipment</p>
                 <h2 class="mt-5 font-display text-h1 font-medium">What's included</h2>
                 @if ($car->features->isNotEmpty())
@@ -178,7 +179,7 @@
         </div>
     </section>
 
-    @if ($relatedCars->isNotEmpty())<section class="bg-pearl py-section-compact"><div class="mx-auto max-w-site px-gutter"><h2 class="font-display text-h2 font-medium">You might also like</h2><div class="mt-8 grid gap-grid md:grid-cols-2 lg:grid-cols-3">@foreach ($relatedCars as $relatedCar)<x-vehicle-card :car="$relatedCar" />@endforeach</div></div></section>@endif
+    @if ($relatedCars->isNotEmpty())<section class="bg-pearl py-section-compact"><div class="mx-auto max-w-site px-gutter"><h2 class="font-display text-h2 font-medium" data-reveal>You might also like</h2><div class="mt-8 grid gap-grid md:grid-cols-2 lg:grid-cols-3" data-reveal-group>@foreach ($relatedCars as $relatedCar)<div data-reveal><x-vehicle-card :car="$relatedCar" /></div>@endforeach</div></div></section>@endif
     @unless ($isPreview ?? false)
         <dialog id="vehicle-enquiry-modal" class="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-xl rounded-card bg-white p-0 shadow-overlay backdrop:bg-carbon/75" data-request-modal data-open-on-load="{{ $errors->any() ? 'true' : 'false' }}">
             <div class="flex justify-between border-b border-border-default p-5"><div><p class="text-xs font-semibold uppercase text-mercy-red">Vehicle enquiry</p><h2 class="mt-2 font-display text-2xl font-medium">Request a callback</h2></div><button type="button" class="text-2xl font-medium" data-request-modal-close aria-label="Close">&times;</button></div>

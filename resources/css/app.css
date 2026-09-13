@@ -228,6 +228,35 @@
     }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+    html.reveal-ready [data-reveal] {
+        opacity: 0;
+        transform: translateY(1rem);
+        transition:
+            opacity 600ms var(--ease-brand) var(--reveal-delay, 0ms),
+            transform 600ms var(--ease-brand) var(--reveal-delay, 0ms);
+        will-change: opacity, transform;
+    }
+
+    html.reveal-ready [data-reveal="fade"] {
+        transform: none;
+    }
+
+    html.reveal-ready [data-reveal="left"] {
+        transform: translateX(-1rem);
+    }
+
+    html.reveal-ready [data-reveal="right"] {
+        transform: translateX(1rem);
+    }
+
+    html.reveal-ready [data-reveal].is-revealed {
+        opacity: 1;
+        transform: none;
+        will-change: auto;
+    }
+}
+
 @media (min-width: 40rem) {
     .floating-whatsapp {
         right: max(1.5rem, env(safe-area-inset-right));

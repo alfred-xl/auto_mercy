@@ -7,7 +7,7 @@
     <header class="relative isolate flex min-h-[18rem] items-center justify-center overflow-hidden bg-carbon text-center text-pure-white sm:min-h-[20rem]">
         <img src="{{ asset('images/auto-mercy-hero.webp') }}" width="1792" height="1024" alt="" fetchpriority="high" class="absolute inset-0 -z-20 h-full w-full object-cover object-center">
         <div class="absolute inset-0 -z-10 bg-carbon/60" aria-hidden="true"></div>
-        <div class="mx-auto w-full max-w-site px-gutter py-16">
+        <div class="mx-auto w-full max-w-site px-gutter py-16" data-reveal="fade">
             <h1 class="font-display text-[clamp(2.75rem,5vw,4rem)] font-medium leading-none tracking-display">Inventory</h1>
             <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">Browse quality brand-new, foreign-used, and pre-order vehicles available from Auto Mercy.</p>
         </div>
@@ -43,7 +43,7 @@
 
     <section class="bg-surface-secondary py-section" aria-labelledby="inventory-results-heading">
         <div class="mx-auto grid max-w-site gap-8 px-gutter lg:grid-cols-[minmax(17.5rem,20rem)_minmax(0,1fr)] lg:items-start">
-            <aside class="hidden rounded-card border border-border-default bg-pure-white p-5 lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto" aria-label="Filter available cars">
+            <aside class="hidden rounded-card border border-border-default bg-pure-white p-5 lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto" aria-label="Filter available cars" data-reveal="left">
                 <div class="mb-6 border-b border-border-default pb-5">
                     <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Find your car</p>
                     <h2 class="mt-2 text-xl font-medium text-carbon">Filter inventory</h2>
@@ -61,7 +61,7 @@
             </aside>
 
             <div class="min-w-0" id="inventory-results" data-inventory-results aria-busy="false">
-                <div class="rounded-card border border-border-default bg-pure-white p-4 md:p-5">
+                <div class="rounded-card border border-border-default bg-pure-white p-4 md:p-5" data-reveal>
                     <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                         <div>
                             <p id="inventory-results-heading" class="text-lg font-medium text-carbon" tabindex="-1">{{ $cars->total() }} {{ Str::plural('car', $cars->total()) }} found</p>
@@ -111,29 +111,29 @@
                 @endif
 
                 @if ($hasFilterErrors)
-                    <div class="mt-7 rounded-card border border-mercy-red/30 bg-pure-white px-6 py-12 text-center">
+                    <div class="mt-7 rounded-card border border-mercy-red/30 bg-pure-white px-6 py-12 text-center" data-reveal>
                         <h2 class="font-display text-2xl font-medium">Some filters need attention</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Review the highlighted values and apply the filters again. No inventory has been shown for the invalid request.</p>
                         <button type="button" class="btn-primary mt-6 lg:hidden" data-inventory-filter-trigger aria-expanded="false" aria-controls="inventory-filter-drawer">Review Filters</button>
                     </div>
                 @elseif ($cars->isNotEmpty())
-                    <div class="mt-7 grid gap-grid md:grid-cols-2">
+                    <div class="mt-7 grid gap-grid md:grid-cols-2" data-reveal-group>
                         @foreach ($cars as $car)
-                            <x-vehicle-card :car="$car" />
+                            <div data-reveal><x-vehicle-card :car="$car" /></div>
                         @endforeach
                     </div>
                     @if ($cars->hasPages())
                         <div class="mt-10">{{ $cars->onEachSide(1)->links() }}</div>
                     @endif
                 @elseif (! $hasPublicInventory)
-                    <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
+                    <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center" data-reveal>
                         <img src="{{ asset('images/auto-mercy-logo.webp') }}" width="80" height="80" alt="" loading="lazy" class="mx-auto h-20 w-20 object-contain opacity-70">
                         <h2 class="mt-5 font-display text-2xl font-medium">Available cars are being updated</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">There are no active vehicles online right now. Call or message Auto Mercy to confirm the current inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call {{ config('automercy.business.phone_display') }}</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
                     </div>
                 @else
-                    <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
+                    <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center" data-reveal>
                         <h2 class="font-display text-2xl font-medium">No cars match these filters</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Remove one criterion above or clear all filters to browse the complete Available inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ route('cars.index') }}" class="btn-secondary">Clear All</a><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call Auto Mercy</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>

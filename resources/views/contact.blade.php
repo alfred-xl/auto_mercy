@@ -10,7 +10,7 @@
             class="absolute inset-0 -z-20 h-full w-full scale-105 object-cover object-center">
         <div class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(22,21,19,0.82)_0%,rgba(36,33,31,0.72)_50%,rgba(22,21,19,0.82)_100%)]"
             aria-hidden="true"></div>
-        <div class="mx-auto w-full max-w-site px-gutter py-16">
+        <div class="mx-auto w-full max-w-site px-gutter py-16" data-reveal="fade">
             <h1 class="font-display text-[clamp(2.75rem,5vw,4rem)] font-medium leading-none tracking-display">Contact Auto Mercy</h1>
             <p class="mx-auto mt-6 max-w-3xl text-base leading-7 text-metallic sm:text-lg">Speak with our team, ask about a vehicle, or plan a visit to either Lagos office.</p>
         </div>
@@ -18,13 +18,13 @@
 
     <section id="contact-options" class="bg-pearl py-section" aria-labelledby="contact-options-heading">
         <div class="mx-auto grid max-w-site gap-12 px-gutter lg:grid-cols-[0.82fr_1.18fr] lg:gap-24">
-            <div class="max-w-lg">
+            <div class="max-w-lg" data-reveal="left">
                 <p class="text-sm font-semibold uppercase tracking-label text-text-secondary">Talk to our team</p>
                 <h2 id="contact-options-heading" class="mt-7 font-display text-[clamp(2.4rem,4vw,3.25rem)] font-medium leading-[1.05] tracking-display text-carbon">Choose the easiest way to reach us.</h2>
                 <p class="mt-7 text-base leading-8 text-text-secondary sm:text-lg">Call, send an email, or start a WhatsApp conversation. For vehicle enquiries, sharing the make and model helps our team assist you faster.</p>
             </div>
 
-            <div class="border-y border-border-default">
+            <div class="border-y border-border-default" data-reveal="right">
                 <a href="{{ $business['telephone_url'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red">
                     <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-pearl text-mercy-red">
                         <x-heroicon-o-phone class="h-5 w-5" aria-hidden="true" />
@@ -54,7 +54,7 @@
 
     <section id="locations" class="bg-pure-white py-section" aria-labelledby="locations-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="grid gap-5 md:grid-cols-[1fr_0.7fr] md:items-end">
+            <div class="grid gap-5 md:grid-cols-[1fr_0.7fr] md:items-end" data-reveal>
                 <div class="max-w-2xl">
                     <p class="text-xs font-semibold uppercase tracking-label text-text-secondary">Visit Auto Mercy</p>
                     <h2 id="locations-heading" class="mt-5 font-display text-h1 font-medium tracking-display text-carbon">Our two Lagos offices</h2>
@@ -62,10 +62,10 @@
                 <p class="max-w-xl leading-7 text-text-secondary md:justify-self-end">Call before visiting so our team can confirm the vehicle and its current location.</p>
             </div>
 
-            <div class="mt-12 grid gap-6 lg:grid-cols-2">
+            <div class="mt-12 grid gap-6 lg:grid-cols-2" data-reveal-group>
                 @foreach ($locations as $location)
                     @php($mapEmbedUrl = 'https://www.google.com/maps?q='.rawurlencode($location['address']).'&output=embed')
-                    <article class="overflow-hidden rounded-card border border-border-default bg-pearl">
+                    <article class="overflow-hidden rounded-card border border-border-default bg-pearl" data-reveal>
                         <div class="relative h-52 overflow-hidden bg-metallic sm:h-56">
                             <iframe
                                 src="{{ $mapEmbedUrl }}"
@@ -97,7 +97,7 @@
 
     <section id="contact-form" class="bg-pearl py-section" aria-labelledby="contact-form-heading">
         <div class="mx-auto grid max-w-site items-start gap-12 px-gutter lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-            <div class="max-w-lg">
+            <div class="max-w-lg" data-reveal="left">
                 <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Send a message</p>
                 <h2 id="contact-form-heading" class="mt-5 font-display text-h1 font-medium tracking-display text-carbon">Tell us how we can help.</h2>
                 <p class="mt-6 text-base leading-8 text-text-secondary sm:text-lg">Send your question or vehicle request and a member of the Auto Mercy team will follow up using the contact details you provide.</p>
@@ -109,7 +109,7 @@
                 </ul>
             </div>
 
-            <div class="rounded-card border border-border-default bg-pure-white p-6 sm:p-8 lg:p-10">
+            <div class="rounded-card border border-border-default bg-pure-white p-6 sm:p-8 lg:p-10" data-reveal="right">
                 @if (session('contact_success'))
                     <div class="mb-6 flex items-start gap-3 rounded-button bg-available/10 px-4 py-3 text-sm font-semibold text-available" role="status">
                         <x-heroicon-o-check-circle class="h-5 w-5 shrink-0" aria-hidden="true" />

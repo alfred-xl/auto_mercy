@@ -18,13 +18,13 @@
                     <span class="h-px w-10 bg-gold" aria-hidden="true"></span>
                     Quality cars, clear guidance, direct support.
                 </p> --}}
-                <h1 class="mt-6 font-display text-display font-medium leading-[0.92] tracking-display text-pure-white">
+                <h1 class="mt-6 font-display text-display font-medium leading-[0.92] tracking-display text-pure-white" data-reveal>
                     <span class="block lg:whitespace-nowrap">Find the right car,</span>
                     <span class="block lg:whitespace-nowrap">with clarity at every step.</span>
                 </h1>
-                <p class="mt-7 max-w-[36rem] text-base leading-7 text-metallic sm:text-lg sm:leading-8">Browse quality
+                <p class="mt-7 max-w-[36rem] text-base leading-7 text-metallic sm:text-lg sm:leading-8" data-reveal data-reveal-delay="90">Browse quality
                     vehicles and move from enquiry to delivery with clear, direct support.</p>
-                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" data-reveal data-reveal-delay="180">
                     <a href="{{ route('cars.index') }}" class="btn-primary min-h-13 w-full px-7 sm:w-auto sm:min-w-52"
                         data-floating-whatsapp-avoid>Browse Inventory</a>
                     <a href="{{ route('services') }}"
@@ -34,7 +34,7 @@
             </div>
 
             <div class="mt-16 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)] lg:items-end">
-                <div class="flex items-center gap-3 text-gold">
+                <div class="flex items-center gap-3 text-gold" data-reveal="fade" data-reveal-delay="270">
                     <span class="h-px w-10 bg-gold" aria-hidden="true"></span>
                     <p class="font-display text-sm italic sm:text-base">With God all things are possible.</p>
                 </div>
@@ -64,7 +64,7 @@
     <section class="relative z-10 flow-root bg-pure-white pb-14 sm:pb-16" aria-labelledby="vehicle-search-heading">
         <div class="mx-auto -mt-16 max-w-wide px-gutter sm:-mt-20">
             <div
-                class="relative z-20 rounded-[1.5rem] bg-pure-white px-5 py-8 shadow-overlay sm:px-8 sm:py-10 lg:px-14 lg:py-12">
+                class="relative z-20 rounded-[1.5rem] bg-pure-white px-5 py-8 shadow-overlay sm:px-8 sm:py-10 lg:px-14 lg:py-12" data-reveal>
                 <div>
                     <p class="text-xs font-bold uppercase tracking-label text-mercy-red sm:text-sm">Find your next car
                     </p>
@@ -141,13 +141,13 @@
     <section id="about" class="bg-pearl py-section" aria-labelledby="about-heading">
         <div
             class="mx-auto grid max-w-wide items-center gap-10 px-gutter lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16 xl:gap-24">
-            <div class="overflow-hidden rounded-[1.25rem]">
+            <div class="overflow-hidden rounded-[1.25rem]" data-reveal="left">
                 <img src="{{ asset('images/auto-mercy-hero.webp') }}" width="1792" height="1024"
                     alt="Sedan and SUV parked at Auto Mercy" loading="lazy"
                     class="aspect-[3/2] h-full w-full object-cover object-center">
             </div>
 
-            <div class="max-w-2xl">
+            <div class="max-w-2xl" data-reveal="right">
                 <p class="text-sm font-bold uppercase tracking-label text-mercy-red">About Auto Mercy</p>
                 <h2 id="about-heading"
                     class="mt-5 font-display text-[clamp(2.35rem,4vw,3.5rem)] font-medium leading-[1.05] tracking-heading text-carbon">
@@ -173,7 +173,7 @@
 
     <section class="bg-pearl py-section" aria-labelledby="latest-cars-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between" data-reveal>
                 <div>
                     <p class="text-sm font-semibold uppercase tracking-label text-text-secondary">Fresh inventory</p>
                     <h2 id="latest-cars-heading" class="mt-3 font-display font-medium text-h1">Latest available cars
@@ -200,9 +200,9 @@
             @if ($latestCars->isNotEmpty())
                 <div class="latest-cars-carousel swiper mt-10" data-latest-cars-carousel
                     aria-label="Latest available cars">
-                    <div class="swiper-wrapper">
+                    <div class="swiper-wrapper" data-reveal-group>
                         @foreach ($latestCars as $car)
-                            <div class="swiper-slide"><x-vehicle-card :car="$car" /></div>
+                            <div class="swiper-slide" data-reveal><x-vehicle-card :car="$car" /></div>
                         @endforeach
                     </div>
                     <div class="latest-cars-controls mt-7 flex items-center justify-between gap-5 lg:hidden">
@@ -222,7 +222,7 @@
                     </div>
                 </div>
             @else
-                <div class="mt-10 rounded-card bg-pure-white px-6 py-14 text-center shadow-card">
+                <div class="mt-10 rounded-card bg-pure-white px-6 py-14 text-center shadow-card" data-reveal>
                     <img src="{{ asset('images/auto-mercy-logo.webp') }}" width="80" height="80"
                         alt="" loading="lazy"
                         class="mx-auto h-20 w-20 rounded-card object-contain opacity-70">
@@ -240,7 +240,7 @@
 
     <section class="bg-pure-white py-section" aria-labelledby="support-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between" data-reveal>
                 <div class="max-w-2xl">
                     <p class="text-sm font-semibold uppercase tracking-label text-text-secondary">More than inventory
                     </p>
@@ -251,22 +251,22 @@
                 <a href="{{ route('services') }}" class="text-link md:mb-1">Explore all services
                     <x-heroicon-o-arrow-right class="h-4 w-4" aria-hidden="true" /></a>
             </div>
-            <div class="mt-12 grid gap-6 md:grid-cols-3">
-                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8">
+            <div class="mt-12 grid gap-6 md:grid-cols-3" data-reveal-group>
+                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8" data-reveal>
                     <p class="text-xs font-bold uppercase tracking-label text-mercy-red">01 &middot; Choose</p>
                     <h3 class="mt-5 font-display text-2xl font-medium">Quality available cars</h3>
                     <p class="mt-4 text-base leading-7 text-text-secondary">Browse current vehicles with the key
                         details needed
                         to make a confident shortlist.</p>
                 </article>
-                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8">
+                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8" data-reveal>
                     <p class="text-xs font-bold uppercase tracking-label text-mercy-red">02 &middot; Inspect</p>
                     <h3 class="mt-5 font-display text-2xl font-medium">Personal buying support</h3>
                     <p class="mt-4 text-base leading-7 text-text-secondary">Speak with a real person, ask questions,
                         and arrange
                         a viewing at the relevant Lagos location.</p>
                 </article>
-                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8">
+                <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8" data-reveal>
                     <p class="text-xs font-bold uppercase tracking-label text-mercy-red">03 &middot; Receive</p>
                     <h3 class="mt-5 font-display text-2xl font-medium">Nationwide delivery</h3>
                     <p class="mt-4 text-base leading-7 text-text-secondary">Collect in Lagos or discuss suitable
@@ -279,7 +279,7 @@
 
     <section class="bg-carbon py-section text-pure-white" aria-labelledby="testimonials-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="max-w-3xl">
+            <div class="max-w-3xl" data-reveal>
                 <p class="text-sm font-semibold uppercase tracking-label text-metallic">What drivers say</p>
                 <h2 id="testimonials-heading" class="mt-3 font-display text-h1 font-medium text-pure-white">Trusted by
                     buyers
@@ -289,9 +289,9 @@
             </div>
 
             {{-- Temporary testimonial copy approved for the initial design; replace with verified customer submissions. --}}
-            <div class="mt-12 grid gap-6 md:grid-cols-3">
+            <div class="mt-12 grid gap-6 md:grid-cols-3" data-reveal-group>
                 @foreach ([['Straightforward from the first call to pickup — no pressure, no surprises.', 'Chidinma O.', 'Iju Road, Lagos'], ['They answered every question clearly and helped me compare the right options.', 'Tunde A.', 'Bamboo Plaza, Lagos'], ['The delivery conversation was simple, direct, and everything was explained upfront.', 'Grace E.', 'Delivered outside Lagos']] as [$quote, $name, $location])
-                    <figure class="flex min-h-64 flex-col rounded-card border border-white/10 bg-graphite p-7 sm:p-8">
+                    <figure class="flex min-h-64 flex-col rounded-card border border-white/10 bg-graphite p-7 sm:p-8" data-reveal>
                         <div class="flex gap-1 text-lg tracking-wider text-gold" aria-label="Five out of five stars">
                             <span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
                         </div>
@@ -309,7 +309,7 @@
 
     <section id="locations" class="bg-pure-white py-section" aria-labelledby="locations-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="max-w-3xl">
+            <div class="max-w-3xl" data-reveal>
                 <p class="text-sm font-semibold uppercase tracking-label text-mercy-red">Visit Auto Mercy</p>
                 <h2 id="locations-heading" class="mt-3 font-display text-h1 font-medium">Our {{ count($locations) }}
                     Lagos
@@ -335,9 +335,9 @@
                     </a>
                 </div>
             </div>
-            <div class="mt-12 grid gap-6 lg:grid-cols-2">
+            <div class="mt-12 grid gap-6 lg:grid-cols-2" data-reveal-group>
                 @foreach ($locations as $location)
-                    <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8">
+                    <article class="rounded-card border border-border-default bg-pure-white p-7 sm:p-8" data-reveal>
                         <p class="flex items-center gap-2 text-xs font-bold uppercase tracking-label text-mercy-red">
                             <svg class="h-4 w-4 text-mercy-red" aria-hidden="true" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -367,7 +367,7 @@
 
     <section class="border-t border-border-default bg-pure-white py-section" aria-labelledby="faq-heading">
         <div class="mx-auto max-w-site px-gutter">
-            <div class="max-w-3xl">
+            <div class="max-w-3xl" data-reveal>
                 <p class="text-xs font-bold uppercase tracking-label text-mercy-red sm:text-sm">Common questions</p>
                 <h2 id="faq-heading" class="mt-3 font-display text-h1 font-medium">Before you reach out</h2>
 
@@ -394,7 +394,7 @@
     <section class="border-y border-border-default bg-pure-white py-12 text-carbon sm:py-14"
         aria-labelledby="closing-cta-heading">
         <div
-            class="mx-auto flex max-w-site flex-col gap-9 px-gutter md:flex-row md:items-center md:justify-between md:gap-12">
+            class="mx-auto flex max-w-site flex-col gap-9 px-gutter md:flex-row md:items-center md:justify-between md:gap-12" data-reveal>
             <div class="max-w-3xl">
                 <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Delivery available nationwide
                 </p>

@@ -47,6 +47,48 @@ if (trigger && menu) {
 const desktopCarouselMedia = window.matchMedia('(min-width: 1024px)');
 const reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+const revealElements = Array.from(document.querySelectorAll('[data-reveal]'));
+
+if (revealElements.length > 0) {
+    if (reducedMotionMedia.matches || !('IntersectionObserver' in window)) {
+        revealElements.forEach((element) => element.classList.add('is-revealed'));
+    } else {
+        document.documentElement.classList.add('reveal-ready');
+
+        document.querySelectorAll('[data-reveal-group]').forEach((group) => {
+            Array.from(group.children)
+                .filter((child) => child.matches('[data-reveal]'))
+                .forEach((child, index) => {
+                    if (!child.dataset.revealDelay) {
+                        child.style.setProperty('--reveal-delay', `${Math.min(index * 90, 360)}ms`);
+                    }
+                });
+        });
+
+        revealElements.forEach((element) => {
+            if (element.dataset.revealDelay) {
+                element.style.setProperty('--reveal-delay', `${element.dataset.revealDelay}ms`);
+            }
+        });
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+
+                entry.target.classList.add('is-revealed');
+                observer.unobserve(entry.target);
+            });
+        }, {
+            rootMargin: '0px 0px -8% 0px',
+            threshold: 0.12,
+        });
+
+        revealElements.forEach((element) => revealObserver.observe(element));
+    }
+}
+
 document.querySelectorAll('[data-latest-cars-carousel]').forEach((carousel) => {
     let swiper = null;
 
