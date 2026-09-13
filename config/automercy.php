@@ -17,7 +17,7 @@ return [
         'telephone_url' => 'tel:+2348061731673',
         'whatsapp_url' => 'https://wa.me/2348061731673',
         'email' => 'automercyofgod19@gmail.com',
-        'opening_hours_display' => 'Monday–Saturday, 8:00 AM–6:00 PM',
+        'opening_hours_display' => 'Monday-Saturday, 8:00 AM-6:00 PM',
     ],
     'social' => [
         'instagram' => env('AUTOMERCY_INSTAGRAM_URL'),

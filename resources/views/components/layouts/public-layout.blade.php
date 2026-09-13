@@ -45,34 +45,38 @@
 <body class="min-h-screen overflow-x-hidden bg-surface-primary font-sans text-[0.9375rem] text-text-primary antialiased">
     <a href="#main-content" class="fixed left-4 top-3 z-[100] -translate-y-24 bg-pure-white px-4 py-3 font-semibold text-carbon shadow-overlay transition-transform focus:translate-y-0">Skip to main content</a>
 
-    <header class="sticky top-0 z-50 border-b border-border-default bg-pure-white font-sans shadow-sm">
-        <div class="mx-auto flex min-h-24 max-w-site items-center justify-between gap-5 px-gutter">
+    <header class="sticky top-0 z-50 border-b border-metallic bg-pearl font-sans">
+        <div class="mx-auto grid min-h-20 max-w-site grid-cols-[auto_1fr_auto] items-center gap-4 px-gutter lg:min-h-[5.5rem] lg:gap-8">
             <a href="{{ route('home') }}" class="inline-flex shrink-0 items-center" aria-label="Auto Mercy home">
-                <img src="{{ asset('logo.png') }}" width="500" height="500" alt="Auto Mercy of God Nigeria Limited" class="h-[4.5rem] w-[4.5rem] object-contain lg:h-20 lg:w-20">
+                <img src="{{ asset('logo.png') }}" width="500" height="500" alt="Auto Mercy of God Nigeria Limited" class="h-16 w-16 object-contain lg:h-[4.5rem] lg:w-[4.5rem]">
             </a>
 
-            <nav class="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
+            <nav class="hidden items-center justify-self-center gap-9 lg:flex" aria-label="Primary navigation">
                 <a class="public-nav-link" href="{{ route('home') }}" @if (request()->routeIs('home')) aria-current="page" @endif>Home</a>
                 <a class="public-nav-link" href="{{ route('cars.index') }}" @if (request()->routeIs('cars.*')) aria-current="page" @endif>Inventory</a>
                 <a class="public-nav-link" href="{{ route('services') }}" @if (request()->routeIs('services')) aria-current="page" @endif>Services</a>
                 <a class="public-nav-link" href="{{ route('home') }}#about">About</a>
             </nav>
 
-            <a href="{{ route('contact') }}" class="btn-primary hidden lg:inline-flex" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact Us</a>
-
-            <button type="button" class="mobile-menu-trigger inline-flex h-11 w-11 items-center justify-center rounded-button border-2 border-border-strong text-carbon transition-colors hover:border-mercy-red hover:text-mercy-red lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-trigger>
-                <span class="sr-only">Open navigation</span>
-                <x-heroicon-o-bars-3 class="h-6 w-6" aria-hidden="true" />
-            </button>
+            <div class="flex items-center justify-self-end gap-2 lg:gap-3">
+                <a href="{{ route('cars.index') }}" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-metallic bg-pure-white/60 text-carbon transition-[border-color,background-color,color,transform] hover:-translate-y-px hover:border-mercy-red hover:bg-pure-white hover:text-mercy-red" aria-label="Search vehicle inventory">
+                    <x-heroicon-o-magnifying-glass class="h-5 w-5" aria-hidden="true" />
+                </a>
+                <a href="{{ route('contact') }}" class="hidden min-h-11 items-center justify-center rounded-full bg-mercy-red px-6 py-3 text-sm font-medium text-pure-white shadow-sm transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:bg-mercy-red-dark hover:shadow-card lg:inline-flex" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact Us</a>
+                <button type="button" class="mobile-menu-trigger inline-flex h-11 w-11 items-center justify-center rounded-full border border-metallic bg-pure-white/60 text-carbon transition-colors hover:border-mercy-red hover:text-mercy-red lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-mobile-menu-trigger>
+                    <span class="sr-only">Open navigation</span>
+                    <x-heroicon-o-bars-3 class="h-6 w-6" aria-hidden="true" />
+                </button>
+            </div>
         </div>
 
-        <div id="mobile-menu" class="absolute inset-x-0 top-full hidden border-y border-border-default bg-pure-white shadow-overlay lg:hidden" data-mobile-menu>
+        <div id="mobile-menu" class="absolute inset-x-0 top-full hidden border-y border-metallic bg-pearl shadow-overlay lg:hidden" data-mobile-menu>
             <nav class="mx-auto grid max-w-site gap-1 px-gutter py-5" aria-label="Mobile navigation">
                 <a class="mobile-nav-link" href="{{ route('home') }}" @if (request()->routeIs('home')) aria-current="page" @endif>Home</a>
                 <a class="mobile-nav-link" href="{{ route('cars.index') }}" @if (request()->routeIs('cars.*')) aria-current="page" @endif>Inventory</a>
                 <a class="mobile-nav-link" href="{{ route('services') }}" @if (request()->routeIs('services')) aria-current="page" @endif>Services</a>
                 <a class="mobile-nav-link" href="{{ route('home') }}#about">About</a>
-                <a class="mobile-nav-link" href="{{ route('contact') }}" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact Us</a>
+                <a class="btn-primary mt-2 rounded-full" href="{{ route('contact') }}" @if (request()->routeIs('contact')) aria-current="page" @endif>Contact Us</a>
             </nav>
         </div>
     </header>

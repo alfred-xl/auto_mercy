@@ -17,9 +17,9 @@
     --font-sans: 'Inter', sans-serif;
 
     /* Responsive brand type scale */
-    --text-display: clamp(3rem, 5vw, 3.5rem);
-    --text-display--line-height: 1;
-    --text-display--letter-spacing: -0.02em;
+    --text-display: clamp(3.25rem, 6vw, 5.5rem);
+    --text-display--line-height: 0.92;
+    --text-display--letter-spacing: -0.035em;
     --text-display--font-weight: 600;
     --text-hero: clamp(3rem, 5vw, 3.5rem);
     --text-hero--line-height: 1;

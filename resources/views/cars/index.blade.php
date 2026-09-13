@@ -8,7 +8,7 @@
         <img src="{{ asset('images/auto-mercy-hero.webp') }}" width="1792" height="1024" alt="" fetchpriority="high" class="absolute inset-0 -z-20 h-full w-full object-cover object-center">
         <div class="absolute inset-0 -z-10 bg-carbon/60" aria-hidden="true"></div>
         <div class="mx-auto w-full max-w-site px-gutter py-16">
-            <h1 class="font-display text-h1 font-semibold tracking-display">Inventory</h1>
+            <h1 class="font-display text-[clamp(2.75rem,5vw,4rem)] font-medium leading-none tracking-display">Inventory</h1>
             <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">Browse quality brand-new, foreign-used, and pre-order vehicles available from Auto Mercy.</p>
         </div>
     </header>
@@ -19,7 +19,7 @@
             <div class="flex items-center justify-between gap-4 border-b border-border-default px-5 py-4">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Refine inventory</p>
-                    <h2 id="mobile-filter-title" class="mt-1 text-xl font-semibold text-carbon">Filters</h2>
+                    <h2 id="mobile-filter-title" class="mt-1 text-xl font-medium text-carbon">Filters</h2>
                 </div>
                 <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-button border border-border-default text-carbon transition-colors hover:border-carbon" data-inventory-filter-close aria-label="Close filters">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
@@ -46,7 +46,7 @@
             <aside class="hidden rounded-card border border-border-default bg-pure-white p-5 lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto" aria-label="Filter available cars">
                 <div class="mb-6 border-b border-border-default pb-5">
                     <p class="text-xs font-semibold uppercase tracking-label text-mercy-red">Find your car</p>
-                    <h2 class="mt-2 text-xl font-semibold text-carbon">Filter inventory</h2>
+                    <h2 class="mt-2 text-xl font-medium text-carbon">Filter inventory</h2>
                 </div>
                 <x-inventory-filters
                     :filters="$filters"
@@ -64,7 +64,7 @@
                 <div class="rounded-card border border-border-default bg-pure-white p-4 md:p-5">
                     <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                         <div>
-                            <p id="inventory-results-heading" class="text-lg font-semibold text-carbon" tabindex="-1">{{ $cars->total() }} {{ Str::plural('car', $cars->total()) }} found</p>
+                            <p id="inventory-results-heading" class="text-lg font-medium text-carbon" tabindex="-1">{{ $cars->total() }} {{ Str::plural('car', $cars->total()) }} found</p>
                             <p class="mt-1 text-sm text-text-secondary">Published inventory from our Lagos locations.</p>
                         </div>
                         <div class="flex flex-wrap items-end gap-3">
@@ -88,7 +88,7 @@
                                 </div>
                                 <button type="submit" class="sr-only focus:not-sr-only focus:btn-secondary">Apply sort</button>
                             </form>
-                            <button type="button" class="inline-flex h-12 items-center justify-center gap-2 rounded-button border border-border-default bg-pure-white px-4 text-sm font-semibold text-carbon transition-colors hover:border-carbon" data-share-inventory>
+                            <button type="button" class="inline-flex h-12 items-center justify-center gap-2 rounded-button border border-border-default bg-pure-white px-4 text-sm font-medium text-carbon transition-colors hover:border-carbon" data-share-inventory>
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
                                 Share
                             </button>
@@ -112,7 +112,7 @@
 
                 @if ($hasFilterErrors)
                     <div class="mt-7 rounded-card border border-mercy-red/30 bg-pure-white px-6 py-12 text-center">
-                        <h2 class="text-2xl font-semibold">Some filters need attention</h2>
+                        <h2 class="font-display text-2xl font-medium">Some filters need attention</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Review the highlighted values and apply the filters again. No inventory has been shown for the invalid request.</p>
                         <button type="button" class="btn-primary mt-6 lg:hidden" data-inventory-filter-trigger aria-expanded="false" aria-controls="inventory-filter-drawer">Review Filters</button>
                     </div>
@@ -128,13 +128,13 @@
                 @elseif (! $hasPublicInventory)
                     <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
                         <img src="{{ asset('images/auto-mercy-logo.webp') }}" width="80" height="80" alt="" loading="lazy" class="mx-auto h-20 w-20 object-contain opacity-70">
-                        <h2 class="mt-5 text-2xl font-semibold">Available cars are being updated</h2>
+                        <h2 class="mt-5 font-display text-2xl font-medium">Available cars are being updated</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">There are no active vehicles online right now. Call or message Auto Mercy to confirm the current inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call {{ config('automercy.business.phone_display') }}</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
                     </div>
                 @else
                     <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center">
-                        <h2 class="text-2xl font-semibold">No cars match these filters</h2>
+                        <h2 class="font-display text-2xl font-medium">No cars match these filters</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Remove one criterion above or clear all filters to browse the complete Available inventory.</p>
                         <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ route('cars.index') }}" class="btn-secondary">Clear All</a><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call Auto Mercy</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
                     </div>
