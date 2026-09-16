@@ -1,6 +1,7 @@
 <x-layouts.public-layout
     title="Vehicle Services in Lagos | Auto Mercy"
     description="Explore Auto Mercy vehicle sales, viewing support, reservation assistance, and nationwide delivery services."
+    page-type="services"
 >
     <section class="bg-pearl py-section-compact sm:py-section">
         <div class="mx-auto grid max-w-wide items-center gap-12 px-gutter lg:grid-cols-[0.95fr_1.05fr] lg:gap-20 xl:gap-28">

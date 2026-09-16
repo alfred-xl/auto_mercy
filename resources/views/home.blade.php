@@ -1,6 +1,6 @@
 <x-layouts.public-layout title="Cars for Sale in Lagos | Auto Mercy"
     description="Shop brand-new, foreign-used, and pre-order cars from Auto Mercy in Lagos. Browse current inventory, get direct assistance, and arrange nationwide delivery."
-    :canonical="route('home')" :structured-data="$structuredData">
+    :canonical="$canonical" :structured-data="$structuredData" page-type="home">
     <section
         class="relative isolate min-h-[calc(100svh-5rem)] overflow-hidden bg-carbon text-pure-white lg:min-h-[46rem]">
         <img src="{{ asset('images/auto-mercy-2.jpg') }}" width="736" height="385"
@@ -18,13 +18,13 @@
                     <span class="h-px w-10 bg-gold" aria-hidden="true"></span>
                     Quality cars, clear guidance, direct support.
                 </p> --}}
-                <h1 class="mt-6 font-display text-display font-medium leading-[0.92] tracking-display text-pure-white" data-reveal>
+                <h1 class="mt-6 font-display text-display font-medium leading-[0.92] tracking-display text-pure-white">
                     <span class="block lg:whitespace-nowrap">Find the right car,</span>
                     <span class="block lg:whitespace-nowrap">with clarity at every step.</span>
                 </h1>
-                <p class="mt-7 max-w-[36rem] text-base leading-7 text-metallic sm:text-lg sm:leading-8" data-reveal data-reveal-delay="90">Browse quality
+                <p class="mt-7 max-w-[36rem] text-base leading-7 text-metallic sm:text-lg sm:leading-8">Browse quality
                     vehicles and move from enquiry to delivery with clear, direct support.</p>
-                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" data-reveal data-reveal-delay="180">
+                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
                     <a href="{{ route('cars.index') }}" class="btn-primary min-h-13 w-full px-7 sm:w-auto sm:min-w-52"
                         data-floating-whatsapp-avoid>Browse Inventory</a>
                     <a href="{{ route('services') }}"
@@ -202,7 +202,7 @@
                     aria-label="Latest available cars">
                     <div class="swiper-wrapper" data-reveal-group>
                         @foreach ($latestCars as $car)
-                            <div class="swiper-slide" data-reveal><x-vehicle-card :car="$car" /></div>
+                            <div class="swiper-slide" data-reveal><x-vehicle-card :car="$car" sizes="(min-width: 1280px) 380px, (min-width: 1024px) calc((100vw - 5rem) / 3), (min-width: 768px) 46vw, 88vw" /></div>
                         @endforeach
                     </div>
                     <div class="latest-cars-controls mt-7 flex items-center justify-between gap-5 lg:hidden">
@@ -277,36 +277,6 @@
         </div>
     </section>
 
-    <section class="bg-carbon py-section text-pure-white" aria-labelledby="testimonials-heading">
-        <div class="mx-auto max-w-site px-gutter">
-            <div class="max-w-3xl" data-reveal>
-                <p class="text-sm font-semibold uppercase tracking-label text-metallic">What drivers say</p>
-                <h2 id="testimonials-heading" class="mt-3 font-display text-h1 font-medium text-pure-white">Trusted by
-                    buyers
-                    across Lagos</h2>
-                <p class="mt-3 text-base text-metallic sm:text-lg">A snapshot of the straightforward experience
-                    customers value at Auto Mercy.</p>
-            </div>
-
-            {{-- Temporary testimonial copy approved for the initial design; replace with verified customer submissions. --}}
-            <div class="mt-12 grid gap-6 md:grid-cols-3" data-reveal-group>
-                @foreach ([['Straightforward from the first call to pickup — no pressure, no surprises.', 'Chidinma O.', 'Iju Road, Lagos'], ['They answered every question clearly and helped me compare the right options.', 'Tunde A.', 'Bamboo Plaza, Lagos'], ['The delivery conversation was simple, direct, and everything was explained upfront.', 'Grace E.', 'Delivered outside Lagos']] as [$quote, $name, $location])
-                    <figure class="flex min-h-64 flex-col rounded-card border border-white/10 bg-graphite p-7 sm:p-8" data-reveal>
-                        <div class="flex gap-1 text-lg tracking-wider text-gold" aria-label="Five out of five stars">
-                            <span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                        </div>
-                        <blockquote class="mt-6 flex-1 font-display text-xl italic leading-8 text-pure-white">
-                            &ldquo;{{ $quote }}&rdquo;</blockquote>
-                        <figcaption class="mt-7">
-                            <p class="font-semibold text-pure-white">{{ $name }}</p>
-                            <p class="mt-1 text-sm text-metallic">{{ $location }}</p>
-                        </figcaption>
-                    </figure>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
     <section id="locations" class="bg-pure-white py-section" aria-labelledby="locations-heading">
         <div class="mx-auto max-w-site px-gutter">
             <div class="max-w-3xl" data-reveal>
@@ -333,6 +303,7 @@
                         </svg>
                         WhatsApp
                     </a>
+                    <a href="mailto:{{ $business['email'] }}" class="btn-secondary px-7">Email us</a>
                 </div>
             </div>
             <div class="mt-12 grid gap-6 lg:grid-cols-2" data-reveal-group>
@@ -359,6 +330,10 @@
                             </svg>
                             {{ $business['opening_hours_display'] }}
                         </p>
+                        <a href="{{ $location['map_url'] }}" class="text-link mt-6" target="_blank" rel="noopener" data-analytics-event="directions_click" data-analytics-cta="locations">
+                            Get directions
+                            <x-heroicon-o-arrow-top-right-on-square class="h-4 w-4" aria-hidden="true" />
+                        </a>
                     </article>
                 @endforeach
             </div>
@@ -372,7 +347,7 @@
                 <h2 id="faq-heading" class="mt-3 font-display text-h1 font-medium">Before you reach out</h2>
 
                 <div class="mt-10 divide-y divide-border-default border-b border-border-default">
-                    @foreach ([['Can I inspect a car before deciding?', 'Yes. Contact our team to confirm where the vehicle is located and arrange a suitable time to inspect it before making your decision.'], ['What kinds of vehicles does Auto Mercy offer?', 'Our inventory can include brand-new, foreign-used, and pre-order vehicles. Check each listing for its current category and availability.'], ['How does nationwide delivery work?', 'Delivery arrangements depend on the vehicle and destination. Speak with our team for timing, cost, and collection details before confirming your purchase.'], ['Do you offer financing or trade-ins?', 'Availability can change, so please contact the team to discuss the current financing or trade-in options for your preferred vehicle.'], ['How do I know which Lagos location has a vehicle?', 'Call or message us before visiting. We will confirm whether the vehicle is at Iju Road or Bamboo Plaza and help arrange your visit.']] as $index => [$question, $answer])
+                    @foreach ([['Can I inspect a car before deciding?', 'Yes. Contact our team to confirm where the vehicle is located and arrange a suitable time to inspect it before making your decision.'], ['What kinds of vehicles does Auto Mercy offer?', 'Our inventory can include brand-new, foreign-used, and pre-order vehicles. Check each listing for its current category and availability.'], ['How does nationwide delivery work?', 'Delivery arrangements depend on the vehicle and destination. Speak with our team for timing, cost, and collection details before confirming your purchase.'], ['How do I know which Lagos location has a vehicle?', 'Call or message us before visiting. We will confirm whether the vehicle is at Iju Road or Bamboo Plaza and help arrange your visit.']] as $index => [$question, $answer])
                         <details class="group py-5" @if ($index === 0) open @endif>
                             <summary
                                 class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 font-display text-lg font-semibold text-carbon marker:content-none">

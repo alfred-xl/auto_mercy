@@ -42,17 +42,18 @@ class CarInventoryQuery
     {
         return collect($filters)
             ->only(self::PARAMETERS)
-            ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+            ->map(fn ($value, string $key) => $key === 'page' ? (int) $value : (is_string($value) ? trim($value) : $value))
             ->reject(fn ($value) => $value === null || $value === '')
             ->reject(fn ($value, string $key): bool => ($key === 'sort' && $value === 'latest') || ($key === 'page' && (int) $value <= 1))
             ->all();
     }
 
-    public function shouldRedirectToCanonicalQuery(array $filters): bool
+    public function shouldRedirectToCanonicalQuery(array $filters, array $additionalAllowed = []): bool
     {
-        return array_diff(array_keys($filters), self::PARAMETERS) !== []
+        return array_diff(array_keys($filters), [...self::PARAMETERS, ...$additionalAllowed]) !== []
             || (($filters['sort'] ?? null) === 'latest')
             || (isset($filters['page']) && (int) $filters['page'] <= 1)
+            || (isset($filters['page']) && (string) $filters['page'] !== (string) (int) $filters['page'])
             || (isset($filters['q']) && $filters['q'] !== trim((string) $filters['q']));
     }
 

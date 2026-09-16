@@ -1,16 +1,18 @@
 <x-layouts.public-layout
     title="Contact Auto Mercy | Lagos Car Dealership"
     description="Contact Auto Mercy of God Nigeria Limited by phone, email, WhatsApp, or visit either of our Lagos offices."
-    :canonical="route('contact')"
+    :canonical="$canonical"
+    :structured-data="$structuredData"
     :show-floating-whats-app="false"
     :condensed-contact-footer="true"
+    page-type="contact"
 >
     <header class="relative isolate flex min-h-[20rem] items-center justify-center overflow-hidden bg-carbon text-center text-pure-white sm:min-h-[22rem]">
         <img src="{{ asset('images/auto-mercy-1.jpg') }}" width="626" height="417" alt="" fetchpriority="high"
             class="absolute inset-0 -z-20 h-full w-full scale-105 object-cover object-center">
         <div class="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(22,21,19,0.82)_0%,rgba(36,33,31,0.72)_50%,rgba(22,21,19,0.82)_100%)]"
             aria-hidden="true"></div>
-        <div class="mx-auto w-full max-w-site px-gutter py-16" data-reveal="fade">
+        <div class="mx-auto w-full max-w-site px-gutter py-16">
             <h1 class="font-display text-[clamp(2.75rem,5vw,4rem)] font-medium leading-none tracking-display">Contact Auto Mercy</h1>
             <p class="mx-auto mt-6 max-w-3xl text-base leading-7 text-metallic sm:text-lg">Speak with our team, ask about a vehicle, or plan a visit to either Lagos office.</p>
         </div>
@@ -25,7 +27,7 @@
             </div>
 
             <div class="border-y border-border-default" data-reveal="right">
-                <a href="{{ $business['telephone_url'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red">
+                <a href="{{ $business['telephone_url'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red" data-analytics-cta="contact_options">
                     <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-pearl text-mercy-red">
                         <x-heroicon-o-phone class="h-5 w-5" aria-hidden="true" />
                     </span>
@@ -41,7 +43,7 @@
                     <x-heroicon-o-arrow-right class="h-5 w-5 text-text-secondary transition-transform group-hover:translate-x-1 group-hover:text-mercy-red" aria-hidden="true" />
                 </a>
 
-                <a href="{{ $whatsappUrl }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 py-5" target="_blank" rel="noopener">
+                <a href="{{ $whatsappUrl }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 py-5" target="_blank" rel="noopener" data-analytics-cta="contact_options">
                     <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-whatsapp text-pure-white">
                         <x-icons.whatsapp class="h-5 w-5" />
                     </span>
@@ -75,7 +77,7 @@
                                 referrerpolicy="no-referrer-when-downgrade"
                                 allowfullscreen
                             ></iframe>
-                            <a href="{{ $location['map_url'] }}" class="absolute left-4 top-4 inline-flex min-h-10 items-center gap-2 rounded-button bg-pure-white px-4 text-sm font-medium text-carbon shadow-card transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover" target="_blank" rel="noopener">
+                            <a href="{{ $location['map_url'] }}" class="absolute left-4 top-4 inline-flex min-h-10 items-center gap-2 rounded-button bg-pure-white px-4 text-sm font-medium text-carbon shadow-card transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover" target="_blank" rel="noopener" data-analytics-event="directions_click" data-analytics-cta="locations">
                                 <x-heroicon-o-arrow-top-right-on-square class="h-4 w-4" aria-hidden="true" />
                                 Open in Maps
                             </a>

@@ -1,166 +1,73 @@
-# SEO requirements
+# SEO implementation
 
-SEO is part of the server-rendered page contract. Visible title, price, availability, car facts, metadata, internal links, and JSON-LD must read the same current records so a status change cannot leave contradictory output.
+SEO is part of the server-rendered public-page contract. Auto Mercy is one dealership with two physical locations and one shared inventory. A vehicle has one record, one management workflow, and one public URL; neither staff nor customers assign stock to a location. Customers are asked to confirm the viewing location before visiting.
 
-## Indexation and canonical matrix
+## Indexing and canonical policy
 
-| URL class | Robots | Canonical | XML sitemap |
+| URL class | Robots | Canonical | Sitemap |
 |---|---|---|---|
-| Approved static public page | `index,follow` | Self | Yes |
-| Clean `/cars` | `index,follow` when useful inventory exists | Self | Yes |
-| Unfiltered `/cars?page=2+` | `index,follow` | Self, including page | Optional; details are primary discovery URLs |
-| Filter, search, or non-default sort | `noindex,follow` | Clean `/cars` | No |
-| Qualified make/body/category landing | `index,follow` only after publication gate | Self | Yes |
-| Known published but currently empty landing | `noindex,follow` | Self | No |
-| Available or Reserved car | `index,follow` | Self | Yes |
-| Sold car during retention | `index,follow` | Self | Yes while indexable |
-| Draft | Not served publicly (404) | None | No |
-| Archived | 410 or a manually selected relevant redirect | None or redirect target | No |
-| Admin | `noindex,nofollow` plus authentication | None | No |
-| Unknown record/out-of-range page | 404 | None | No |
+| Home, Services, Contact | `index,follow` | Self | Yes |
+| `/cars` with public inventory | `index,follow` | Self | Yes |
+| `/cars?page=1` | 301 to `/cars` | N/A | No |
+| Unfiltered `/cars?page=2+` | `index,follow` | Self, including `page` | No |
+| Search, filter, or alternative sort | `noindex,follow` | Normalized self URL | No |
+| Published curated landing with matching inventory | `index,follow` | Self, including page 2+ | Yes |
+| Published curated landing temporarily empty | `noindex,follow` | Self | No |
+| Available, Reserved, or retained Sold vehicle | `index,follow` | Self | Yes |
+| Draft / unknown / unpublished landing / out-of-range page | 404 | None | No |
+| Archived vehicle | 410 | None | No |
+| Authenticated staff preview | `noindex,nofollow` | Public vehicle URL | No |
 
-Filtered pages must remain crawlable long enough for the `noindex` directive to be read; do not rely on a conflicting broad `robots.txt` block. Monitor parameter crawling in Search Console before changing crawl controls. Google advises controlling faceted URL spaces and using separate self-canonicals for real pagination pages rather than canonicalizing all pages to page 1: [faceted navigation](https://developers.google.com/crawling/docs/faceted-navigation), [robots meta](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag), and [pagination](https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading).
+Filtered results deliberately use normalized self-canonicals because different filters can produce materially different result sets. They remain `noindex,follow`; the application does not falsely identify every filtered page as a duplicate of `/cars`. `robots.txt` does not block these URLs, so crawlers can read the directive. Google treats canonical declarations as signals and recommends crawl controls for large faceted spaces: [canonical guidance](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls), [faceted navigation](https://developers.google.com/crawling/docs/faceted-navigation), and [robots meta](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag).
 
-## Canonical URL rules
+Only inventory keys defined by `CarInventoryQuery` affect results. The explicit campaign allowlist is `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `gclid`, `dclid`, `gbraid`, `wbraid`, `fbclid`, and `msclkid`. These values survive a necessary normalization redirect but never enter canonical URLs, Open Graph URLs, sitemap entries, or generated internal links. Unsupported query parameters are removed by a permanent normalization redirect.
 
-- Use one approved HTTPS host, absolute URLs, lowercase paths, and no trailing slash except `/`.
-- Tracking parameters never appear in canonicals, Open Graph URLs, internal links, or sitemap entries.
-- `?page=1` normalizes to the clean route. Unfiltered page 2+ self-canonicalizes.
-- Search/filter/sort pages canonicalize to `/cars`; filtered pagination follows the same rule and remains `noindex`.
-- Curated landing pagination self-canonicalizes only after that landing passes its publication gate.
-- A changed published slug issues one permanent redirect from a recorded former slug; avoid chains.
-- Sitemaps, internal links, HTTP redirects, and canonical elements must agree. Canonicals are signals rather than guaranteed directives ([Google canonical guidance](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)).
+Canonical and sitemap URLs use `SEO_BASE_URL`, falling back to `APP_URL`. Production must configure the approved HTTPS origin; the repository intentionally does not guess it and does not force a hostname redirect. Set `TRUSTED_PROXIES` to a comma-separated allowlist only when the deployment is actually behind those proxies. This keeps forwarded scheme/host handling explicit and avoids redirect loops.
 
-`canonical_override` is exceptional: only a Super Administrator may set a validated same-site HTTPS URL, with a reason, preview, and audit. Most pages derive self-canonicals.
+## Metadata and vehicle status
 
-## Metadata
+The shared public layout owns title, description, robots, canonical, Open Graph, Twitter card, JSON-LD, and analytics configuration output.
 
-Every indexable page needs a unique server-rendered `<title>`, meta description, canonical, Open Graph title/description/URL/type, and sharing image when an approved asset exists. Add Twitter/X card metadata where appropriate without implying that an account exists.
-
-Recommended patterns (final copy remains editable and length-checked):
-
-```text
-{Year} {Make} {Model} {Trim} for Sale in Lagos | Auto Mercy
-{Make} Cars for Sale in Lagos | Auto Mercy
-{Body Type} Cars for Sale in Lagos | Auto Mercy
-Auto Mercy Iju Car Stand | Lagos
-{Guide Title} | Auto Mercy
-Sold: {Year} {Make} {Model} {Trim} | Auto Mercy
-```
-
-Descriptions use only visible facts such as status, price, mileage, condition, assigned car stand, inspection/contact actions, and nationwide delivery. Avoid duplicated boilerplate and unsupported claims. Sold titles/descriptions state Sold. The car's actual primary image is its Open Graph image. A generic sharing asset and organization-logo output wait for approved production variants.
+- Available vehicle: `{Year} {Make} {Model} {Trim} for Sale in Lagos | Auto Mercy`.
+- Reserved vehicle: `Reserved: {Year} {Make} {Model} {Trim} | Auto Mercy`.
+- Sold vehicle: `Sold: {Year} {Make} {Model} {Trim} | Auto Mercy`.
+- Descriptions combine verified category, body type, price, mileage when known, current status, and an inspection/contact action.
+- Rich text is stripped, entities decoded, and whitespace normalized before it is used as plain text.
+- The primary vehicle image is the sharing image, with stored editable alt text and a stable generic fallback.
+- Sold pages retain their useful URL and facts, use `OutOfStock`, invite enquiries about similar available cars, and show available alternatives. They are excluded from active inventory collections.
+- Reserved and Sold are availability labels. Brand-new, foreign-used, and pre-order remain separate listing categories.
 
 ## Structured data
 
-Emit JSON-LD in the initial HTML and validate against both Schema.org and Google's Rich Results Test. Markup cannot add facts that are absent from visible content.
+JSON-LD is emitted in initial HTML.
 
-| Page | Graph and decision |
-|---|---|
-| Home/About | One `Organization`: `name` Auto Mercy, `legalName` Auto Mercy of God Nigeria Limited, approved URL/email/contact and logo only when eligible |
-| Contact/Car Stands | Organization plus two stable `AutoDealer` location nodes using visible approved facts |
-| Car-stand detail | One `AutoDealer` node with exact address and Monday–Saturday 08:00–18:00, plus breadcrumb |
-| Car detail | Dual `@type: ["Product", "Car"]`, nested `Offer`, and `BreadcrumbList` |
-| Guide detail | `Article` with real author/publisher/dates/image plus `BreadcrumbList` |
-| Other lower pages | `BreadcrumbList` only when the matching visible trail exists |
-| FAQs | Omit `FAQPage` at launch; reconsider only if search guidance/product value changes |
+- Home and Contact contain one `Organization` for Auto Mercy plus two `AutoDealer` physical-location nodes. Both location nodes use `parentOrganization` to reference the same organization; they do not represent separate businesses or stock pools.
+- Vehicle pages contain `@type: ["Product", "Car"]`, a current `Offer`, actual vehicle fields and image URLs, the Auto Mercy seller node, and a `BreadcrumbList` matching the visible trail.
+- Offer price uses the visible integer price and `NGN`. Available maps to `InStock`; Reserved and Sold map to `OutOfStock`.
+- `NewCondition` is emitted only for brand-new listings. `UsedCondition` is emitted only for foreign-used listings. Pre-order does not imply a condition, so condition is omitted.
+- Mileage, fuel, transmission, colours, body type, and images are emitted only when stored.
+- Ratings, reviews, coordinates, warranties, delivery promises, checkout behavior, and FAQ schema are not invented.
 
-`AutoDealer` is the most specific suitable Schema.org subtype below `AutomotiveBusiness`/`LocalBusiness` ([Schema.org AutoDealer](https://schema.org/AutoDealer)). Model each car stand with its own stable `@id` and canonical page; relate both to the single organization without implying separate legal entities.
+Validate representative output against Schema.org and Google's supported rich-result tooling after production URLs are accessible. Product markup does not guarantee a rich result.
 
-### Car/offer mapping
+## Curated inventory landing pages
 
-| Schema property | Source / rule |
-|---|---|
-| `name` | Visible year/make/model/trim title |
-| `sku` | Immutable stock number |
-| `brand` | Actual vehicle make—not the dealership |
-| `model`, `vehicleModelDate` | Actual model and year |
-| `mileageFromOdometer` | Actual value and matching unit |
-| `fuelType`, `vehicleTransmission`, colours | Visible stored facts only |
-| `itemCondition` | `UsedCondition` |
-| `image` | Crawlable actual car image URLs |
-| `offers.price`, `priceCurrency` | Visible integer price, `NGN` |
-| `offers.url`, `seller` | Canonical car URL and Auto Mercy organization node |
-| `offers.availability` | Available → `InStock`; Reserved/Sold → `OutOfStock` |
+The reusable routes are `/cars/makes/{slug}`, `/cars/categories/{slug}`, and `/cars/body-types/{slug}`. They query the same `cars` table and `CarInventoryQuery` used by `/cars`; there are no copied or branch-specific collections.
 
-Product-snippet markup fits a single-car page where contact happens off-site. Google notes that `Car` is not automatically treated as a `Product`, so dual typing is appropriate where Product eligibility is intended ([Google Product snippet guidance](https://developers.google.com/search/docs/appearance/structured-data/product-snippet)). Do not emit purchase/checkout properties the site cannot fulfil. Do not add ratings, reviews, or aggregate ratings.
+Publication is explicit in `config/automercy.php`. Candidate Toyota, Lexus, foreign-used, brand-new, and SUV pages are disabled by default through environment flags. Enable one only after confirming relevant real inventory and approving its distinct copy. Published pages provide a title, description, H1, introduction, visible and structured breadcrumbs, vehicle links, related published landing links, and correct pagination. Unknown or unpublished pages return 404. A temporarily empty published page remains a useful 200 with contact options, `noindex,follow`, and no sitemap entry.
 
-Google generally limits FAQ rich-result display to authoritative government and health sites. Semantic visible FAQs remain useful, but launch markup provides no expected benefit ([Google FAQ update](https://developers.google.com/search/blog/2023/08/howto-faq-changes)).
+## Sitemap and images
 
-## Curated landing pages
+`/sitemap.xml` is a dynamic sitemap appropriate to the current site size. It contains canonical indexable static pages, active public vehicle pages, retained Sold pages, and published non-empty curated landings. It excludes query results, pagination, drafts, archived vehicles, previews, errors, unpublished/noindex/empty landings, and admin routes. `lastmod` uses stored content, vehicle, or image-related timestamps rather than request time. Car image changes touch their vehicle, and image reordering explicitly touches the vehicle. `public/robots.txt` references the sitemap.
 
-Make, body-type, and future selected category pages are database-backed editorial publications, not automatic faceted pages. A page can be indexable only when it has:
+Vehicle cards and galleries retain the WebP variant pipeline, output stored intrinsic dimensions when available, and use responsive `srcset`/`sizes`. The visible main image is eager with high fetch priority; thumbnails and below-fold card images are lazy. Important headings and content are not hidden behind reveal animations, and navigation, forms, links, inventory results, and core copy remain server-rendered and usable without JavaScript.
 
-- relevant Available inventory;
-- a unique useful H1 and introduction;
-- unique title and description;
-- canonical URL and visible breadcrumbs;
-- meaningful links to cars, related guides, and broader inventory;
-- enough sustained customer/search value to avoid thin content.
+## Production activation checklist
 
-If a known published taxonomy temporarily reaches zero Available cars, keep a useful 200 page with `noindex,follow`, an honest message, alternatives, and contact actions; remove it from the sitemap. Unknown/unpublished taxonomy returns 404. Do not publish arbitrary combinations or artificial location pages.
+1. Set `APP_URL` and `SEO_BASE_URL` to the approved HTTPS origin. Set `TRUSTED_PROXIES` only to verified proxy addresses/CIDRs, then rebuild configuration cache.
+2. Review actual production inventory and enable only supported landing flags (`SEO_LANDING_*_PUBLISHED=true`).
+3. Verify both addresses, hours, telephone/WhatsApp, email, and map destinations against current business records.
+4. Verify a Search Console Domain property, submit `/sitemap.xml`, inspect representative URLs, and monitor canonical selection, indexing, crawl stats, Product/Breadcrumb enhancements, and Core Web Vitals.
+5. Test rendered structured data after real price/status/image changes and run live mobile performance checks from production.
 
-## Sold-car strategy
-
-1. On transition to Sold, keep the canonical detail URL at 200 and initially indexable.
-2. Immediately show Sold visibly, remove it from all Available collections and hold actions, and change `Offer` availability to `OutOfStock`.
-3. Keep factual content, actual images, and up to four related Available cars.
-4. Retain the URL in the cars sitemap while it remains indexable.
-5. Create a manual review task after 90 days; age alone does not auto-archive.
-6. Keep permanently when unique content, backlinks, impressions, or inventory-history value justify it.
-7. Redirect only when an administrator selects a strongly relevant replacement. Never send every Sold car to Home.
-8. Otherwise use an optional interim 200 `noindex,follow` deindexing period, then archive to 410.
-
-This preserves bookmarks and earned relevance without misleading customers. Search Console data informs review, but the retention period remains a policy recommendation pending operational approval.
-
-## Local SEO
-
-- Use only the supplied addresses for Iju and Ogunnisi Road. Do not invent coordinates, postal codes, access landmarks, or map URLs.
-- Use the approved Monday–Saturday 8:00 AM–6:00 PM hours.
-- Display the approved local number. Add structured/deep-link `telephone` only after the intended international format is approved; Google recommends country and area codes in organization data.
-- Add `sameAs` only for verified canonical profile URLs.
-- `public/logo.jpeg` now exists, but logo structured data and general production use wait for provenance/production approval and a crawlable suitable variant. Google's current organization logo guidance requires a crawlable supported image at least 112×112 ([Organization guidance](https://developers.google.com/search/docs/appearance/structured-data/organization)).
-- Each car-stand page needs distinct address/access content, actual media, assigned inventory, and useful visit information. Google Business Profile setup/verification is an external launch task.
-- Follow current [LocalBusiness guidance](https://developers.google.com/search/docs/appearance/structured-data/local-business) and never add fabricated review markup.
-
-## XML sitemaps
-
-Planned endpoints:
-
-```text
-/sitemap.xml
-/sitemaps/pages.xml
-/sitemaps/cars.xml
-/sitemaps/guides.xml
-/sitemaps/car-stands.xml
-```
-
-The root file is a sitemap index. Curated make/body/category pages may live in `pages.xml` initially. Include only public canonical indexable URLs; exclude query filters/search/sort, Draft, Archived, admin, error responses, and unqualified/empty landings. Include Sold cars only during their indexable period. `lastmod` changes only for meaningful visible price, status, copy, or media changes. Use absolute production URLs, reference `/sitemap.xml` from `robots.txt`, and submit only the index to Search Console. Google recommends listing preferred canonical URLs ([sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap)).
-
-## Image SEO
-
-- Use actual car media with descriptive filenames such as `2019-toyota-camry-xse-front.jpg`.
-- Alt text identifies the actual car and view; describe a visible notable detail where useful. Decorative assets have empty alt.
-- Include intrinsic width/height and responsive sources. Keep a stable primary URL.
-- Provide modern WebP/AVIF where processing support is verified, with JPEG fallback.
-- Do not lazy-load the LCP primary image; lazy-load below-fold gallery media.
-- Ensure media URLs are crawlable when the car is public. Optional image sitemap entries can be evaluated after launch data.
-
-## Internal linking and breadcrumbs
-
-- Home links to Available Cars, How to Buy, both car stands, and real current cars.
-- Car details link to qualified make/body pages, the assigned car stand, Reservation Policy, and related Available cars.
-- Qualified landings link to actual car details and relevant guides.
-- Car-stand pages may link to their user-facing filtered inventory URL, which remains `noindex`.
-- Guides link contextually to canonical inventory/landing pages. Footer links all core business and legal pages.
-- Never link internally to tracking-parameter variants.
-- Visible breadcrumb paths and `BreadcrumbList` match; follow [Google breadcrumb guidance](https://developers.google.com/search/docs/appearance/structured-data/breadcrumb).
-
-## Search Console launch checklist
-
-- Verify a Domain property and production HTTPS variants.
-- Submit `/sitemap.xml` and confirm processing.
-- Inspect representative static, Available, Reserved, Sold, stand, guide, curated, and paginated URLs.
-- Monitor Page Indexing, selected canonicals, crawl stats, Core Web Vitals, sitemap coverage, Product/Breadcrumb enhancements, security issues, and manual actions.
-- Review query-parameter discovery before tightening `robots.txt`.
-- Validate server-rendered JSON-LD, then re-test after status/price changes.
-- Confirm status, visible copy, metadata, Open Graph and structured data change from the same transaction/cache invalidation.
+Useful future buyer-guide topics may include how to inspect a used car, documents to check before buying in Nigeria, and how Auto Mercy reservations work. These should only be published later with reviewed, accurate business/legal content; no blog or generic articles are part of this implementation.

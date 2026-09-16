@@ -16,6 +16,9 @@ class CarImage extends Model
     /** @use HasFactory<CarImageFactory> */
     use HasFactory;
 
+    /** @var list<string> */
+    protected $touches = ['car'];
+
     public function car(): BelongsTo
     {
         return $this->belongsTo(Car::class);
@@ -52,6 +55,15 @@ class CarImage extends Model
                 ? $this->variantUrl($variant, $format).' '.$width.'w'
                 : null;
         })->filter()->implode(', ');
+    }
+
+    /** @return array{width: int|null, height: int|null} */
+    public function dimensions(string $variant, string $format = 'webp'): array
+    {
+        return [
+            'width' => data_get($this->derivatives, "{$variant}.{$format}.width"),
+            'height' => data_get($this->derivatives, "{$variant}.{$format}.height"),
+        ];
     }
 
     /** @return list<string> */

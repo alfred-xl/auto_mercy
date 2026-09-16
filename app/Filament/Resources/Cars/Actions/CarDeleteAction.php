@@ -17,7 +17,7 @@ class CarDeleteAction
             ->label('Delete')
             ->authorize('delete')
             ->modalHeading(fn (Car $record): string => 'Delete '.$record->display_name.'?')
-            ->modalDescription(fn (Car $record): string => 'You are about to permanently delete '.$record->display_name.' and all of its gallery images. This action cannot be undone.')
+            ->modalDescription(fn (Car $record): string => 'You are about to permanently delete '.$record->display_name.' and all of its gallery images. If this vehicle has been published, its public URL will stop working and be removed from the sitemap. Archive the vehicle instead when the listing should be retired but retained. This action cannot be undone.')
             ->modalSubmitActionLabel('Delete vehicle')
             ->successNotificationTitle('Vehicle deleted')
             ->using(fn (Car $record): bool => self::delete($record));

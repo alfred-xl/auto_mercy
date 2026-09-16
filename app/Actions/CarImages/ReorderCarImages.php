@@ -34,6 +34,8 @@ class ReorderCarImages
             foreach ($orderedImageIds as $sortOrder => $imageId) {
                 CarImage::query()->whereKey($imageId)->update(['sort_order' => $sortOrder]);
             }
+
+            $car->touch();
         });
     }
 }

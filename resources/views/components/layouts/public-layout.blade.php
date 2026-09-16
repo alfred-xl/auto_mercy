@@ -1,16 +1,33 @@
 @props([
     'title' => 'Auto Mercy',
     'description' => 'Quality brand-new, foreign-used, and pre-order cars from Auto Mercy in Lagos.',
-    'canonical' => url()->current(),
-    'image' => asset('images/auto-mercy-hero.webp'),
+    'canonical' => null,
+    'image' => null,
+    'imageAlt' => 'Cars available from Auto Mercy in Lagos',
+    'ogType' => 'website',
     'robots' => 'index,follow',
     'structuredData' => null,
     'showFloatingWhatsApp' => true,
     'condensedContactFooter' => false,
+    'pageType' => 'website',
+    'analyticsContext' => [],
 ])
 
 @php
+    $seoUrls = app(\App\Support\SeoUrl::class);
+    $canonical = $canonical ?: $seoUrls->absolute(request()->getPathInfo());
+    $image = $image ?: $seoUrls->absolute('/images/auto-mercy-hero.webp');
     $socialLinks = collect((array) config('automercy.social'))->filter(fn ($url) => filled($url));
+    $analyticsConfiguration = [
+        'provider' => config('automercy.analytics.provider'),
+        'enabled' => (bool) config('automercy.analytics.enabled') && filled(config('automercy.analytics.measurement_id')),
+        'measurement_id' => config('automercy.analytics.measurement_id'),
+        'requires_consent' => (bool) config('automercy.analytics.requires_consent'),
+        'page_type' => $pageType,
+        'context' => $analyticsContext,
+        'accepted_event' => session('analytics_event'),
+        'attribution_parameters' => \App\Support\AttributionParameters::ALLOWED,
+    ];
 @endphp
 
 <!DOCTYPE html>
@@ -24,13 +41,13 @@
     <meta name="description" content="{{ $description }}">
     <link rel="canonical" href="{{ $canonical }}">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $ogType }}">
     <meta property="og:site_name" content="Auto Mercy">
     <meta property="og:title" content="{{ $title }}">
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $image }}">
-    <meta property="og:image:alt" content="Auto Mercy vehicles in Lagos">
+    <meta property="og:image:alt" content="{{ $imageAlt }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $title }}">
     <meta name="twitter:description" content="{{ $description }}">
@@ -39,6 +56,8 @@
     @if ($structuredData)
         <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     @endif
+
+    <script id="auto-mercy-analytics-config" type="application/json">{!! json_encode($analyticsConfiguration, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -151,7 +170,7 @@
     </footer>
 
     @if ($showFloatingWhatsApp)
-        <a href="{{ config('automercy.business.whatsapp_url') }}?text={{ rawurlencode('Hello Auto Mercy, I would like help finding a car.') }}" class="floating-whatsapp fixed z-40 inline-flex min-h-12 items-center gap-2 whitespace-nowrap rounded-full bg-whatsapp px-4 py-3 text-sm font-semibold text-pure-white shadow-overlay transition-[bottom,opacity,transform,box-shadow] hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-whatsapp sm:px-5" target="_blank" rel="noopener" aria-label="Chat with Auto Mercy on WhatsApp" data-floating-whatsapp>
+        <a href="{{ config('automercy.business.whatsapp_url') }}?text={{ rawurlencode('Hello Auto Mercy, I would like help finding a car.') }}" class="floating-whatsapp fixed z-40 inline-flex min-h-12 items-center gap-2 whitespace-nowrap rounded-full bg-whatsapp px-4 py-3 text-sm font-semibold text-pure-white shadow-overlay transition-[bottom,opacity,transform,box-shadow] hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-whatsapp sm:px-5" target="_blank" rel="noopener" aria-label="Chat with Auto Mercy on WhatsApp" data-floating-whatsapp data-analytics-cta="floating">
             <x-icons.whatsapp class="h-5 w-5 shrink-0" />
             <span>Chat with us</span>
         </a>

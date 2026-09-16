@@ -53,6 +53,13 @@ class InventoryFilterRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if ($this->has('page')) {
+            $page = $this->input('page');
+
+            abort_if(! is_scalar($page) || ! ctype_digit((string) $page) || (int) $page < 1, 404);
+            $this->merge(['page' => (int) $page]);
+        }
+
         if ($this->has('q')) {
             $this->merge(['q' => trim((string) $this->input('q'))]);
         }

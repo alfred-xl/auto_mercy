@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Support\SeoStructuredData;
+use App\Support\SeoUrl;
 use Illuminate\Contracts\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(): View
+    public function __invoke(SeoUrl $urls, SeoStructuredData $structuredData): View
     {
         $latestCars = Car::query()->activeInventory()->with('coverImage')->latest()->limit(3)->get();
         $searchMakes = Car::query()->activeInventory()->distinct()->orderBy('make')->pluck('make');
@@ -15,16 +17,9 @@ class HomeController extends Controller
         $business = (array) config('automercy.business');
         $locations = (array) config('automercy.locations');
         $whatsappUrl = $business['whatsapp_url'].'?text='.rawurlencode('Hello Auto Mercy, I would like help finding a car.');
-        $structuredData = [
-            '@context' => 'https://schema.org',
-            '@type' => 'AutoDealer',
-            'name' => $business['name'],
-            'url' => route('home'),
-            'logo' => asset('images/auto-mercy-logo.webp'),
-            'email' => $business['email'],
-            'telephone' => $business['phone_e164'],
-        ];
+        $canonical = $urls->route('home');
+        $structuredData = $structuredData->businessGraph($canonical);
 
-        return view('home', compact('latestCars', 'searchMakes', 'searchModels', 'business', 'locations', 'whatsappUrl', 'structuredData'));
+        return view('home', compact('latestCars', 'searchMakes', 'searchModels', 'business', 'locations', 'whatsappUrl', 'structuredData', 'canonical'));
     }
 }

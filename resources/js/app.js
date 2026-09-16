@@ -849,3 +849,202 @@ document.querySelectorAll('[data-request-modal]').forEach((modal) => {
         }
     });
 });
+
+const analyticsConfigElement = document.querySelector('#auto-mercy-analytics-config');
+
+if (analyticsConfigElement) {
+    let analyticsConfig = {};
+
+    try {
+        analyticsConfig = JSON.parse(analyticsConfigElement.textContent || '{}');
+    } catch {
+        analyticsConfig = {};
+    }
+
+    const allowedEvents = new Set([
+        'view_car',
+        'whatsapp_click',
+        'phone_click',
+        'directions_click',
+        'enquiry_submitted',
+        'select_related_car',
+    ]);
+    const allowedParameters = new Set([
+        'event_uuid', 'car_id', 'stock_number', 'make', 'model', 'year', 'status',
+        'page_type', 'cta_position', 'source_context', 'enquiry_type',
+    ]);
+    const analyticsQueue = window.autoMercyAnalyticsQueue = window.autoMercyAnalyticsQueue || [];
+    const trackedEventIds = new Set();
+    const providerDispatchedIds = new Set();
+    const consentKey = 'auto-mercy:analytics-consent';
+    const attributionKey = 'auto-mercy:campaign-attribution';
+
+    const createEventUuid = () => window.crypto?.randomUUID?.()
+        || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    const cleanParameters = (parameters = {}) => Object.fromEntries(
+        Object.entries(parameters)
+            .filter(([key, value]) => allowedParameters.has(key) && value !== null && value !== undefined && value !== '')
+            .map(([key, value]) => [key, typeof value === 'string' ? value.slice(0, 100) : value]),
+    );
+
+    const readConsent = () => {
+        if (!analyticsConfig.requires_consent) {
+            return true;
+        }
+
+        try {
+            return window.localStorage.getItem(consentKey) === 'granted';
+        } catch {
+            return false;
+        }
+    };
+
+    const captureAttribution = () => {
+        const supported = new Set(analyticsConfig.attribution_parameters || []);
+        const attribution = Object.fromEntries(
+            [...new URLSearchParams(window.location.search).entries()]
+                .filter(([key, value]) => supported.has(key) && value)
+                .map(([key, value]) => [key, value.slice(0, 250)]),
+        );
+
+        if (Object.keys(attribution).length === 0) {
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem(attributionKey, JSON.stringify(attribution));
+        } catch {
+            // Campaign capture is best-effort when browser storage is unavailable.
+        }
+    };
+
+    let providerReady = false;
+
+    const dispatchToProvider = (payload) => {
+        if (!providerReady || providerDispatchedIds.has(payload.event_uuid)) {
+            return;
+        }
+
+        providerDispatchedIds.add(payload.event_uuid);
+        window.gtag('event', payload.name, payload.parameters);
+    };
+
+    const initializeProvider = () => {
+        if (providerReady || !analyticsConfig.enabled || analyticsConfig.provider !== 'ga4'
+            || !analyticsConfig.measurement_id || !readConsent()) {
+            return;
+        }
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function gtag() {
+            window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', analyticsConfig.measurement_id);
+
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(analyticsConfig.measurement_id)}`;
+        document.head.appendChild(script);
+        providerReady = true;
+        analyticsQueue.forEach(dispatchToProvider);
+    };
+
+    const track = (name, parameters = {}, eventUuid = null) => {
+        if (!allowedEvents.has(name)) {
+            return;
+        }
+
+        const uuid = eventUuid || createEventUuid();
+
+        if (trackedEventIds.has(uuid)) {
+            return;
+        }
+
+        trackedEventIds.add(uuid);
+        const payload = {
+            name,
+            event_uuid: uuid,
+            parameters: cleanParameters({
+                ...(analyticsConfig.context || {}),
+                page_type: analyticsConfig.page_type,
+                ...parameters,
+                event_uuid: uuid,
+            }),
+        };
+        analyticsQueue.push(payload);
+        window.dispatchEvent(new CustomEvent('auto-mercy:analytics', { detail: payload }));
+
+        initializeProvider();
+
+        dispatchToProvider(payload);
+    };
+
+    captureAttribution();
+    initializeProvider();
+
+    if (analyticsConfig.page_type === 'car_detail') {
+        track('view_car', { source_context: 'direct_or_navigation' });
+    }
+
+    const acceptedEvent = analyticsConfig.accepted_event;
+
+    if (acceptedEvent?.name && acceptedEvent?.event_uuid) {
+        let wasTracked = false;
+
+        try {
+            const storageKey = `auto-mercy:accepted-event:${acceptedEvent.event_uuid}`;
+            wasTracked = window.sessionStorage.getItem(storageKey) === 'true';
+
+            if (!wasTracked) {
+                window.sessionStorage.setItem(storageKey, 'true');
+            }
+        } catch {
+            // Server flash data already limits this event to the accepted redirect response.
+        }
+
+        if (!wasTracked) {
+            track(acceptedEvent.name, acceptedEvent.parameters, acceptedEvent.event_uuid);
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a[href]');
+
+        if (!link) {
+            return;
+        }
+
+        const href = link.getAttribute('href') || '';
+        let eventName = link.dataset.analyticsEvent;
+
+        if (!eventName && href.startsWith('tel:')) {
+            eventName = 'phone_click';
+        } else if (!eventName && /^https:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(href)) {
+            eventName = 'whatsapp_click';
+        }
+
+        if (!eventName) {
+            return;
+        }
+
+        track(eventName, {
+            cta_position: link.dataset.analyticsCta || 'content',
+            source_context: link.dataset.sourceContext || undefined,
+        });
+    });
+
+    window.AutoMercyAnalytics = {
+        track,
+        setConsent(value) {
+            try {
+                window.localStorage.setItem(consentKey, value === 'granted' ? 'granted' : 'denied');
+            } catch {
+                return;
+            }
+
+            initializeProvider();
+        },
+    };
+}

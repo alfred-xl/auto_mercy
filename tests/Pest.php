@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\Cars\TransitionCarStatus;
+use App\Enums\CarStatus;
 use App\Models\Car;
 use App\Models\CarImage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -36,6 +38,19 @@ function createPublishableCar(array $attributes = []): Car
 {
     $car = Car::factory()->create($attributes);
     CarImage::factory()->for($car)->create();
+
+    return $car->refresh();
+}
+
+/** @param array<string, mixed> $attributes */
+function createPublicCar(CarStatus $status = CarStatus::Available, array $attributes = []): Car
+{
+    $car = createPublishableCar($attributes);
+    app(TransitionCarStatus::class)->execute($car, CarStatus::Available);
+
+    if ($status !== CarStatus::Available) {
+        app(TransitionCarStatus::class)->execute($car, $status);
+    }
 
     return $car->refresh();
 }

@@ -1,15 +1,16 @@
 <x-layouts.public-layout
-    title="Vehicle Inventory in Lagos | Auto Mercy"
-    description="Browse brand-new, foreign-used, and pre-order cars currently available from Auto Mercy. Filter by category, make, model, specifications, and price."
+    title="Cars for Sale in Lagos | Auto Mercy Inventory"
+    description="Browse Auto Mercy cars for sale in Lagos, including brand-new, foreign-used, and pre-order listings. Compare current prices, mileage, specifications, and availability."
     :canonical="$canonical"
     :robots="$robots"
+    page-type="inventory"
 >
     <header class="relative isolate flex min-h-[18rem] items-center justify-center overflow-hidden bg-carbon text-center text-pure-white sm:min-h-[20rem]">
         <img src="{{ asset('images/auto-mercy-hero.webp') }}" width="1792" height="1024" alt="" fetchpriority="high" class="absolute inset-0 -z-20 h-full w-full object-cover object-center">
         <div class="absolute inset-0 -z-10 bg-carbon/60" aria-hidden="true"></div>
-        <div class="mx-auto w-full max-w-site px-gutter py-16" data-reveal="fade">
+        <div class="mx-auto w-full max-w-site px-gutter py-16">
             <h1 class="font-display text-[clamp(2.75rem,5vw,4rem)] font-medium leading-none tracking-display">Inventory</h1>
-            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">Browse quality brand-new, foreign-used, and pre-order vehicles available from Auto Mercy.</p>
+            <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/80 sm:text-lg">Browse our shared selection of brand-new, foreign-used, and pre-order cars. Contact the team to confirm availability and the viewing location.</p>
         </div>
     </header>
 
@@ -65,7 +66,7 @@
                     <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                         <div>
                             <p id="inventory-results-heading" class="text-lg font-medium text-carbon" tabindex="-1">{{ $cars->total() }} {{ Str::plural('car', $cars->total()) }} found</p>
-                            <p class="mt-1 text-sm text-text-secondary">Published inventory from our Lagos locations.</p>
+                            <p class="mt-1 text-sm text-text-secondary">One shared Auto Mercy inventory serving both Lagos locations.</p>
                         </div>
                         <div class="flex flex-wrap items-end gap-3">
                             <button type="button" class="btn-secondary relative px-4 lg:hidden" data-inventory-filter-trigger aria-expanded="false" aria-controls="inventory-filter-drawer">
