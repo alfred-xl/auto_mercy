@@ -98,12 +98,6 @@ return [
             ],
         ],
     ],
-    'analytics' => [
-        'provider' => env('ANALYTICS_PROVIDER', 'ga4'),
-        'enabled' => env('ANALYTICS_ENABLED', false),
-        'measurement_id' => env('ANALYTICS_MEASUREMENT_ID'),
-        'requires_consent' => env('ANALYTICS_REQUIRE_CONSENT', true),
-    ],
     'reservation' => [
         'amount' => 500_000,
         'duration_days' => 14,

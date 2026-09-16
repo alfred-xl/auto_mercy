@@ -19,10 +19,6 @@
     $image = $image ?: $seoUrls->absolute('/images/auto-mercy-hero.webp');
     $socialLinks = collect((array) config('automercy.social'))->filter(fn ($url) => filled($url));
     $analyticsConfiguration = [
-        'provider' => config('automercy.analytics.provider'),
-        'enabled' => (bool) config('automercy.analytics.enabled') && filled(config('automercy.analytics.measurement_id')),
-        'measurement_id' => config('automercy.analytics.measurement_id'),
-        'requires_consent' => (bool) config('automercy.analytics.requires_consent'),
         'page_type' => $pageType,
         'context' => $analyticsContext,
         'accepted_event' => session('analytics_event'),
@@ -58,6 +54,15 @@
     @endif
 
     <script id="auto-mercy-analytics-config" type="application/json">{!! json_encode($analyticsConfiguration, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCW2YWKXRS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-TCW2YWKXRS');
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

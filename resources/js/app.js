@@ -876,7 +876,6 @@ if (analyticsConfigElement) {
     const analyticsQueue = window.autoMercyAnalyticsQueue = window.autoMercyAnalyticsQueue || [];
     const trackedEventIds = new Set();
     const providerDispatchedIds = new Set();
-    const consentKey = 'auto-mercy:analytics-consent';
     const attributionKey = 'auto-mercy:campaign-attribution';
 
     const createEventUuid = () => window.crypto?.randomUUID?.()
@@ -887,18 +886,6 @@ if (analyticsConfigElement) {
             .filter(([key, value]) => allowedParameters.has(key) && value !== null && value !== undefined && value !== '')
             .map(([key, value]) => [key, typeof value === 'string' ? value.slice(0, 100) : value]),
     );
-
-    const readConsent = () => {
-        if (!analyticsConfig.requires_consent) {
-            return true;
-        }
-
-        try {
-            return window.localStorage.getItem(consentKey) === 'granted';
-        } catch {
-            return false;
-        }
-    };
 
     const captureAttribution = () => {
         const supported = new Set(analyticsConfig.attribution_parameters || []);
@@ -919,36 +906,13 @@ if (analyticsConfigElement) {
         }
     };
 
-    let providerReady = false;
-
     const dispatchToProvider = (payload) => {
-        if (!providerReady || providerDispatchedIds.has(payload.event_uuid)) {
+        if (typeof window.gtag !== 'function' || providerDispatchedIds.has(payload.event_uuid)) {
             return;
         }
 
         providerDispatchedIds.add(payload.event_uuid);
         window.gtag('event', payload.name, payload.parameters);
-    };
-
-    const initializeProvider = () => {
-        if (providerReady || !analyticsConfig.enabled || analyticsConfig.provider !== 'ga4'
-            || !analyticsConfig.measurement_id || !readConsent()) {
-            return;
-        }
-
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = window.gtag || function gtag() {
-            window.dataLayer.push(arguments);
-        };
-        window.gtag('js', new Date());
-        window.gtag('config', analyticsConfig.measurement_id);
-
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(analyticsConfig.measurement_id)}`;
-        document.head.appendChild(script);
-        providerReady = true;
-        analyticsQueue.forEach(dispatchToProvider);
     };
 
     const track = (name, parameters = {}, eventUuid = null) => {
@@ -976,13 +940,10 @@ if (analyticsConfigElement) {
         analyticsQueue.push(payload);
         window.dispatchEvent(new CustomEvent('auto-mercy:analytics', { detail: payload }));
 
-        initializeProvider();
-
         dispatchToProvider(payload);
     };
 
     captureAttribution();
-    initializeProvider();
 
     if (analyticsConfig.page_type === 'car_detail') {
         track('view_car', { source_context: 'direct_or_navigation' });
@@ -1035,16 +996,5 @@ if (analyticsConfigElement) {
         });
     });
 
-    window.AutoMercyAnalytics = {
-        track,
-        setConsent(value) {
-            try {
-                window.localStorage.setItem(consentKey, value === 'granted' ? 'granted' : 'denied');
-            } catch {
-                return;
-            }
-
-            initializeProvider();
-        },
-    };
+    window.AutoMercyAnalytics = { track };
 }

@@ -1,11 +1,12 @@
 <?php
 
-it('renders a disabled privacy-safe vehicle analytics context by default', function () {
+it('renders the installed Google tag and privacy-safe vehicle analytics context', function () {
     $car = createPublicCar(attributes: ['make' => 'Toyota', 'model' => 'Camry']);
 
     $this->get(route('cars.show', $car))
         ->assertOk()
-        ->assertSee('"enabled":false', false)
+        ->assertSee('https://www.googletagmanager.com/gtag/js?id=G-TCW2YWKXRS', false)
+        ->assertSee("gtag('config', 'G-TCW2YWKXRS')", false)
         ->assertSee('"page_type":"car_detail"', false)
         ->assertSee('"car_id":"'.$car->getKey().'"', false);
 });

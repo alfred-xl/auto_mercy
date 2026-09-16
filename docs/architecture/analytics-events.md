@@ -2,7 +2,7 @@
 
 Analytics measures website interactions, not off-site outcomes. A WhatsApp, telephone, or directions click does not prove a conversation, qualified lead, visit, reservation, purchase, or delivery.
 
-The public layout emits one non-PII analytics configuration object and `resources/js/app.js` provides one delegated event layer. The provider is configurable and disabled by default. Core navigation, contact links, and forms work when JavaScript, storage, consent, or the analytics provider is unavailable.
+The shared public layout installs Google Analytics 4 measurement ID `G-TCW2YWKXRS` using Google's `gtag.js` snippet. It also emits one non-PII page/event context object, while `resources/js/app.js` provides one delegated custom-event layer. Core navigation, contact links, and forms remain usable when JavaScript, storage, or Google Analytics is unavailable.
 
 ## Supported events
 
@@ -27,27 +27,18 @@ The arrival layer recognizes only `utm_source`, `utm_medium`, `utm_campaign`, `u
 
 No arbitrary query parameters or personal form fields are accepted as attribution.
 
-## Provider, consent, and activation
+## Provider and privacy
 
-The current adapter supports GA4 and is off unless all required configuration is present:
+GA4 is installed directly with the supplied measurement ID `G-TCW2YWKXRS`; the former environment-controlled disabled loader has been removed. The custom layer sends only its explicit non-PII event and parameter allowlist through the installed `gtag` function. The repository does not persist analytics events internally.
 
-```dotenv
-ANALYTICS_PROVIDER=ga4
-ANALYTICS_ENABLED=true
-ANALYTICS_MEASUREMENT_ID=G-XXXXXXXXXX
-ANALYTICS_REQUIRE_CONSENT=true
-```
-
-When consent is required, no GA script loads and no external event dispatch occurs until the application records `granted` through `window.AutoMercyAnalytics.setConsent('granted')`. The existing application does not yet have approved privacy wording or a confirmed consent UI, so production dispatch must remain disabled until those requirements are resolved. `setConsent('denied')` leaves all customer features available.
-
-The repository does not invent a measurement ID and does not persist analytics events internally. If internal reporting is later approved, it needs a separately reviewed retention, consent, validation, rate-limiting, and privacy design.
+The production owner remains responsible for an accurate privacy notice, any consent behavior required for the target users and jurisdictions, GA4 data-retention settings, Google Signals/advertising settings, internal-traffic filtering, and URL/query-parameter redaction. If consent gating is later required, implement Google Consent Mode before the initial `config` call rather than restoring a second competing loader.
 
 ## Production verification
 
-After privacy approval and a real measurement ID are available:
+After deployment:
 
-1. Configure the environment, rebuild the config cache and production assets, and verify the consent decision survives normal navigation.
-2. Use GA4 DebugView and browser network tools to check each supported event once from every relevant CTA.
+1. Use GA4 Realtime/DebugView and browser network tools to confirm `G-TCW2YWKXRS` receives page views and each supported event once from every relevant CTA.
+2. Confirm the production privacy notice and any required consent implementation accurately describe the active Google tag.
 3. Confirm rejected forms never emit `enquiry_submitted`, accepted redirects emit it once, and no PII or full campaign URL appears in payloads.
 4. Test unknown/denied consent, ad blocking, offline navigation, back/forward cache, and refresh behavior. Missing analytics must never block the customer action.
 5. Label reports as views, clicks, and accepted enquiries. Do not rename these metrics as conversations, leads qualified by staff, visits, or sales.
