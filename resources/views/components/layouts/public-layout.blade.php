@@ -56,12 +56,12 @@
     <script id="auto-mercy-analytics-config" type="application/json">{!! json_encode($analyticsConfiguration, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TCW2YWKXRS"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18469766544"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-TCW2YWKXRS');
+        gtag('config', 'AW-18469766544');
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

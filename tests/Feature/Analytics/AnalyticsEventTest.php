@@ -5,8 +5,8 @@ it('renders the installed Google tag and privacy-safe vehicle analytics context'
 
     $this->get(route('cars.show', $car))
         ->assertOk()
-        ->assertSee('https://www.googletagmanager.com/gtag/js?id=G-TCW2YWKXRS', false)
-        ->assertSee("gtag('config', 'G-TCW2YWKXRS')", false)
+        ->assertSee('https://www.googletagmanager.com/gtag/js?id=AW-18469766544', false)
+        ->assertSee("gtag('config', 'AW-18469766544')", false)
         ->assertSee('"page_type":"car_detail"', false)
         ->assertSee('"car_id":"'.$car->getKey().'"', false);
 });
