@@ -27,13 +27,15 @@
             </div>
 
             <div class="border-y border-border-default" data-reveal="right">
-                <a href="{{ $business['telephone_url'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red" data-analytics-cta="contact_options">
-                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-pearl text-mercy-red">
-                        <x-heroicon-o-phone class="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span><span class="block text-xs font-semibold uppercase tracking-label text-text-secondary">Phone</span><span class="mt-1 block text-base font-medium text-carbon group-hover:text-mercy-red sm:text-lg">0806 173 1673</span></span>
-                    <x-heroicon-o-arrow-right class="h-5 w-5 text-text-secondary transition-transform group-hover:translate-x-1 group-hover:text-mercy-red" aria-hidden="true" />
-                </a>
+                @foreach ($business['phones'] as $phoneNumber)
+                    <a href="{{ $phoneNumber['telephone_url'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red" data-analytics-cta="contact_options">
+                        <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-pearl text-mercy-red">
+                            <x-heroicon-o-phone class="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <span><span class="block text-xs font-semibold uppercase tracking-label text-text-secondary">Phone {{ $loop->iteration }}</span><span class="mt-1 block text-base font-medium text-carbon group-hover:text-mercy-red sm:text-lg">{{ $phoneNumber['display'] }}</span></span>
+                        <x-heroicon-o-arrow-right class="h-5 w-5 text-text-secondary transition-transform group-hover:translate-x-1 group-hover:text-mercy-red" aria-hidden="true" />
+                    </a>
+                @endforeach
 
                 <a href="mailto:{{ $business['email'] }}" class="group grid min-h-24 grid-cols-[3rem_1fr_auto] items-center gap-4 border-b border-border-default py-5 transition-colors hover:text-mercy-red">
                     <span class="inline-flex h-12 w-12 items-center justify-center rounded-button bg-pearl text-mercy-red">

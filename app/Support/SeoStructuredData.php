@@ -22,7 +22,7 @@ class SeoStructuredData
             'legalName' => $business['legal_name'],
             'url' => $this->urls->route('home'),
             'email' => $business['email'],
-            'telephone' => $business['phone_e164'],
+            'telephone' => array_column($business['phones'], 'e164'),
         ]];
 
         if ($includeLocations) {
@@ -33,7 +33,7 @@ class SeoStructuredData
                     'name' => $business['name'].' - '.$location['name'],
                     'url' => $pageUrl.'#locations',
                     'parentOrganization' => ['@id' => $organizationId],
-                    'telephone' => $business['phone_e164'],
+                    'telephone' => array_column($business['phones'], 'e164'),
                     'email' => $business['email'],
                     'address' => [
                         '@type' => 'PostalAddress',
@@ -124,7 +124,7 @@ class SeoStructuredData
                     'legalName' => $business['legal_name'],
                     'url' => $this->urls->route('home'),
                     'email' => $business['email'],
-                    'telephone' => $business['phone_e164'],
+                    'telephone' => array_column($business['phones'], 'e164'),
                 ],
                 $this->breadcrumbList($breadcrumbs),
             ],

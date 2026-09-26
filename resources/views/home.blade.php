@@ -229,10 +229,12 @@
                     <h3 class="mt-5 text-2xl font-medium">New arrivals are being prepared</h3>
                     <p class="mx-auto mt-3 max-w-xl text-text-secondary">Our online inventory is being updated. Call or
                         message us for the vehicles currently available at our Lagos locations.</p>
-                    <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ $business['telephone_url'] }}"
-                            class="btn-secondary">Call {{ $business['phone_display'] }}</a><a
-                            href="{{ $whatsappUrl }}" class="btn-primary" target="_blank" rel="noopener">Ask on
-                            WhatsApp</a></div>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3">
+                        @foreach ($business['phones'] as $phoneNumber)
+                            <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary">Call {{ $phoneNumber['display'] }}</a>
+                        @endforeach
+                        <a href="{{ $whatsappUrl }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a>
+                    </div>
                 </div>
             @endif
         </div>
@@ -288,14 +290,16 @@
                     our team can confirm the vehicle
                     and its location.</p>
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <a href="{{ $business['telephone_url'] }}" class="btn-secondary px-7">
-                        <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.8a2 2 0 0 1-.45 2.11L8.07 9.9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.84.55 2.8.68A2 2 0 0 1 22 16.92Z" />
-                        </svg>
-                        Call {{ $business['phone_display'] }}
-                    </a>
+                    @foreach ($business['phones'] as $phoneNumber)
+                        <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary px-7">
+                            <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.8a2 2 0 0 1-.45 2.11L8.07 9.9a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.84.55 2.8.68A2 2 0 0 1 22 16.92Z" />
+                            </svg>
+                            Call {{ $phoneNumber['display'] }}
+                        </a>
+                    @endforeach
                     <a href="{{ $whatsappUrl }}" class="btn-primary px-7" target="_blank" rel="noopener">
                         <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -382,8 +386,10 @@
             <div class="flex shrink-0 flex-col gap-3 sm:flex-row">
                 <a href="{{ route('cars.index') }}" class="btn-primary px-7 sm:min-w-36"
                     data-floating-whatsapp-avoid>Browse cars</a>
-                <a href="{{ $business['telephone_url'] }}" class="btn-secondary px-7 sm:min-w-44"
-                    data-floating-whatsapp-avoid>Call {{ $business['phone_display'] }}</a>
+                @foreach ($business['phones'] as $phoneNumber)
+                    <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary px-7 sm:min-w-44"
+                        data-floating-whatsapp-avoid>Call {{ $phoneNumber['display'] }}</a>
+                @endforeach
             </div>
         </div>
     </section>

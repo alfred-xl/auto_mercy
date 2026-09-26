@@ -18,6 +18,7 @@
     $canonical = $canonical ?: $seoUrls->absolute(request()->getPathInfo());
     $image = $image ?: $seoUrls->absolute('/images/auto-mercy-hero.webp');
     $socialLinks = collect((array) config('automercy.social'))->filter(fn ($url) => filled($url));
+    $phoneNumbers = (array) config('automercy.business.phones');
     $analyticsConfiguration = [
         'page_type' => $pageType,
         'context' => $analyticsContext,
@@ -29,6 +30,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MS2ZK24B');</script>
+    <!-- End Google Tag Manager -->
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#161513">
@@ -67,6 +76,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen overflow-x-hidden bg-surface-primary font-sans text-[0.9375rem] text-text-primary antialiased">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MS2ZK24B"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <a href="#main-content" class="fixed left-4 top-3 z-[100] -translate-y-24 bg-pure-white px-4 py-3 font-semibold text-carbon shadow-overlay transition-transform focus:translate-y-0">Skip to main content</a>
 
     <header class="sticky top-0 z-50 border-b border-metallic bg-pearl font-sans">
@@ -154,12 +168,19 @@
             <div>
                 @if ($condensedContactFooter)
                     <h2 class="text-sm font-semibold uppercase tracking-label text-metallic">Contact Auto Mercy</h2>
-                    <p class="mt-5 max-w-xs text-sm leading-7 text-metallic">All contact options and office details are available above.</p>
+                    <div class="mt-5 grid gap-3 text-sm text-metallic">
+                        @foreach ($phoneNumbers as $phoneNumber)
+                            <a class="footer-link" href="{{ $phoneNumber['telephone_url'] }}">{{ $phoneNumber['display'] }}</a>
+                        @endforeach
+                    </div>
+                    <p class="mt-5 max-w-xs text-sm leading-7 text-metallic">All other contact options and office details are available above.</p>
                     <a class="footer-link mt-3 inline-flex text-sm font-semibold" href="#contact-options">Return to contact options</a>
                 @else
                     <h2 class="text-sm font-semibold uppercase tracking-label text-metallic">Visit or contact</h2>
                     <div class="mt-5 grid gap-3 text-sm text-metallic">
-                        <a class="footer-link" href="{{ config('automercy.business.telephone_url') }}">{{ config('automercy.business.phone_display') }}</a>
+                        @foreach ($phoneNumbers as $phoneNumber)
+                            <a class="footer-link" href="{{ $phoneNumber['telephone_url'] }}">{{ $phoneNumber['display'] }}</a>
+                        @endforeach
                         <a class="footer-link break-all" href="mailto:{{ config('automercy.business.email') }}">{{ config('automercy.business.email') }}</a>
                         <a class="footer-link" href="{{ route('home') }}#locations">View our locations</a>
                     </div>

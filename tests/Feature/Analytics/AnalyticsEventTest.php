@@ -1,10 +1,18 @@
 <?php
 
-it('renders the installed Google tag and privacy-safe vehicle analytics context', function () {
+it('renders the installed Google tags in their required positions with privacy-safe vehicle analytics context', function () {
     $car = createPublicCar(attributes: ['make' => 'Toyota', 'model' => 'Camry']);
 
     $this->get(route('cars.show', $car))
-        ->assertOk()
+        ->assertSeeInOrder([
+            '<head>',
+            '<!-- Google Tag Manager -->',
+            "'GTM-MS2ZK24B'",
+            '<meta charset="utf-8">',
+            '<body class=',
+            '<!-- Google Tag Manager (noscript) -->',
+            'https://www.googletagmanager.com/ns.html?id=GTM-MS2ZK24B',
+        ], false)
         ->assertSee('https://www.googletagmanager.com/gtag/js?id=AW-18469766544', false)
         ->assertSee("gtag('config', 'AW-18469766544')", false)
         ->assertSee('"page_type":"car_detail"', false)

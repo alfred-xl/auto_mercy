@@ -131,13 +131,24 @@
                         <img src="{{ asset('images/auto-mercy-logo.webp') }}" width="80" height="80" alt="" loading="lazy" class="mx-auto h-20 w-20 object-contain opacity-70">
                         <h2 class="mt-5 font-display text-2xl font-medium">Available cars are being updated</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">There are no active vehicles online right now. Call or message Auto Mercy to confirm the current inventory.</p>
-                        <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call {{ config('automercy.business.phone_display') }}</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
+                        <div class="mt-6 flex flex-wrap justify-center gap-3">
+                            @foreach ((array) config('automercy.business.phones') as $phoneNumber)
+                                <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary">Call {{ $phoneNumber['display'] }}</a>
+                            @endforeach
+                            <a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a>
+                        </div>
                     </div>
                 @else
                     <div class="mt-7 rounded-card border border-border-default bg-pure-white px-6 py-14 text-center" data-reveal>
                         <h2 class="font-display text-2xl font-medium">No cars match these filters</h2>
                         <p class="mx-auto mt-3 max-w-xl text-text-secondary">Remove one criterion above or clear all filters to browse the complete Available inventory.</p>
-                        <div class="mt-6 flex flex-wrap justify-center gap-3"><a href="{{ route('cars.index') }}" class="btn-secondary">Clear All</a><a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary">Call Auto Mercy</a><a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a></div>
+                        <div class="mt-6 flex flex-wrap justify-center gap-3">
+                            <a href="{{ route('cars.index') }}" class="btn-secondary">Clear All</a>
+                            @foreach ((array) config('automercy.business.phones') as $phoneNumber)
+                                <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary">Call {{ $phoneNumber['display'] }}</a>
+                            @endforeach
+                            <a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener">Ask on WhatsApp</a>
+                        </div>
                     </div>
                 @endif
             </div>

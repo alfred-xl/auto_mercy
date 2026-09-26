@@ -53,7 +53,9 @@
                     <h2 class="font-display text-2xl font-medium">No matching cars are currently published</h2>
                     <p class="mx-auto mt-3 max-w-2xl leading-7 text-text-secondary">This page remains available to explain the selection, but it is temporarily excluded from search indexing and the sitemap. Contact Auto Mercy for current options.</p>
                     <div class="mt-6 flex flex-wrap justify-center gap-3">
-                        <a href="{{ config('automercy.business.telephone_url') }}" class="btn-secondary" data-analytics-cta="empty_state">Call Auto Mercy</a>
+                        @foreach ((array) config('automercy.business.phones') as $phoneNumber)
+                            <a href="{{ $phoneNumber['telephone_url'] }}" class="btn-secondary" data-analytics-cta="empty_state">Call {{ $phoneNumber['display'] }}</a>
+                        @endforeach
                         <a href="{{ config('automercy.business.whatsapp_url') }}" class="btn-primary" target="_blank" rel="noopener" data-analytics-cta="empty_state">Ask on WhatsApp</a>
                     </div>
                 </div>

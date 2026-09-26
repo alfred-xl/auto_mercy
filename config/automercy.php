@@ -15,9 +15,18 @@ return [
         'legal_name' => 'Auto Mercy of God Nigeria Limited',
         'cac_number' => '7328497',
         'operating_since' => 2023,
-        'phone_display' => '08061731673',
-        'phone_e164' => '+2348061731673',
-        'telephone_url' => 'tel:+2348061731673',
+        'phones' => [
+            [
+                'display' => '0806 173 1673',
+                'e164' => '+2348061731673',
+                'telephone_url' => 'tel:+2348061731673',
+            ],
+            [
+                'display' => '0903 352 4982',
+                'e164' => '+2349033524982',
+                'telephone_url' => 'tel:+2349033524982',
+            ],
+        ],
         'whatsapp_url' => 'https://wa.me/2348061731673',
         'email' => 'automercyofgod19@gmail.com',
         'opening_hours_display' => 'Monday-Saturday, 8:00 AM-6:00 PM',
