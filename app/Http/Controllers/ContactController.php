@@ -38,7 +38,7 @@ class ContactController extends Controller
         return to_route('contact')->with([
             'contact_success' => 'Thanks for reaching out. Our team will contact you shortly.',
             'analytics_event' => [
-                'name' => 'enquiry_submitted',
+                'name' => 'contact_form_submit',
                 'event_uuid' => (string) str()->uuid(),
                 'parameters' => ['page_type' => 'contact', 'enquiry_type' => 'general'],
             ],

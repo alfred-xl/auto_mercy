@@ -866,6 +866,7 @@ if (analyticsConfigElement) {
         'whatsapp_click',
         'phone_click',
         'directions_click',
+        'contact_form_submit',
         'enquiry_submitted',
         'select_related_car',
     ]);
@@ -907,12 +908,20 @@ if (analyticsConfigElement) {
     };
 
     const dispatchToProvider = (payload) => {
-        if (typeof window.gtag !== 'function' || providerDispatchedIds.has(payload.event_uuid)) {
+        if (providerDispatchedIds.has(payload.event_uuid)) {
             return;
         }
 
         providerDispatchedIds.add(payload.event_uuid);
-        window.gtag('event', payload.name, payload.parameters);
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+            ...payload.parameters,
+            event: payload.name,
+        });
+
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', payload.name, payload.parameters);
+        }
     };
 
     const track = (name, parameters = {}, eventUuid = null) => {

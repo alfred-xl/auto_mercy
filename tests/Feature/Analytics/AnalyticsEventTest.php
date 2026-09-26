@@ -49,7 +49,7 @@ it('does not report rejected enquiries as successful', function () {
         ->assertSessionMissing('analytics_event');
 });
 
-it('queues a privacy-safe general enquiry event only after server acceptance', function () {
+it('queues the privacy-safe contact form event only after server acceptance', function () {
     $this->followingRedirects()->post(route('contact.store'), [
         'customer_name' => 'Private Customer',
         'phone' => '+2348000000000',
@@ -57,11 +57,21 @@ it('queues a privacy-safe general enquiry event only after server acceptance', f
         'message' => 'Please contact me about available cars.',
     ])
         ->assertOk()
-        ->assertSee('"name":"enquiry_submitted"', false)
+        ->assertSee('"name":"contact_form_submit"', false)
         ->assertSee('"page_type":"contact"', false)
         ->assertSee('"enquiry_type":"general"', false)
         ->assertDontSee('private@example.test')
         ->assertDontSee('Please contact me about available cars.');
 
     $this->assertDatabaseHas('leads', ['customer_name' => 'Private Customer', 'car_id' => null]);
+});
+
+it('does not queue the contact form event when a general enquiry is rejected', function () {
+    $this->from(route('contact'))
+        ->post(route('contact.store'), [])
+        ->assertRedirect(route('contact'))
+        ->assertSessionHasErrors(['customer_name', 'phone', 'message'])
+        ->assertSessionMissing('analytics_event');
+
+    $this->assertDatabaseCount('leads', 0);
 });
