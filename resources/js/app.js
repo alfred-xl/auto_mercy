@@ -919,7 +919,8 @@ if (analyticsConfigElement) {
             event: payload.name,
         });
 
-        if (typeof window.gtag === 'function') {
+        // WhatsApp conversions are already dispatched through GTM above.
+        if (payload.name !== 'whatsapp_click' && typeof window.gtag === 'function') {
             window.gtag('event', payload.name, payload.parameters);
         }
     };
